@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+
+    <script src="../../../bower_components/webcomponentsjs/webcomponents-lite.js"></script>
+    <link rel="import" href="../poly-map-ol3.html">
+    <link rel="import" href="../../../bower_components/paper-styles/paper-styles.html">
+    <link rel="import" href="../../../bower_components/paper-header-panel/paper-header-panel.html">
+
+    <style is="custom-style">
+        body {
+            padding: 40px;
+        }
+
+        paper-header-panel {
+            float: left;
+            width: 615px;
+            height: 675px;
+            margin: 6px;
+        @apply(--shadow-elevation-4dp);
+        }
+
+        poly-map-ol3 {
+            float: left;
+            width: 600px;
+            height: 600px;
+            margin: 6px;
+        }
+
+        .paper-header {
+            height: 60px;
+            font-size: 16px;
+            line-height: 60px;
+            padding: 0 10px;
+            color: white;
+            transition: height 0.2s;
+        }
+
+        .paper-header.tall {
+            height: 120px;
+        }
+
+        .paper-header.medium-tall {
+            height: 100px;
+            line-height: 50px;
+        }
+
+        .content {
+            height: 600px;
+        }
+
+        .cover {
+            margin: 12px;
+        }
+
+        .blue .paper-header {
+            background-color: var(--paper-light-blue-500);
+        }
+        .green .content {
+            background: linear-gradient(white, #c8e6c9);
+        }
+
+    </style>
+
+</head>
+<body>
+
+
+<div class="layout wrap inline center-center">
+    <paper-header-panel class="blue">
+        <div class="paper-header">DEMO OF THE POLY-MAP-OL3 WEB COMPONENT</div>
+        <div class="content">
+                <poly-map-ol3 UUID="HOLAAAAAAAAAAAA" ></poly-map-ol3>
+        </div>
+    </paper-header-panel>
+
+</div>
+
+
+</body>
+</html>

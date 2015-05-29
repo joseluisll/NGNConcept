@@ -1,0 +1,1 @@
+The purpose of this Component is to Wrap the OpenLayer3 map into a Polymer Case
