@@ -9,17 +9,102 @@
   <title>My AngularJS App</title>
   <meta name="description" content="">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
   <link rel="stylesheet" href="bower_components/html5-boilerplate/css/normalize.css">
   <link rel="stylesheet" href="bower_components/html5-boilerplate/css/main.css">
+  <link rel="stylesheet" href="bower_components/paper-styles/demo.css">
   <link rel="stylesheet" href="app.css">
   <script src="bower_components/html5-boilerplate/js/vendor/modernizr-2.6.2.min.js"></script>
   <link rel="stylesheet" href="js/ol3/ol.css">
   <script src="js/ol3/ol-debug.js"></script>
 
+
+  <link rel="import" href="bower_components/paper-styles/paper-styles.html">
   <link href="bower_components/paper-fab/paper-fab.html" rel="import">
   <link href="bower_components/iron-icons/iron-icons.html" rel="import">
 
+  <link rel="import" href="components/poly-map-ol3/poly-map-ol3.html">
+  <link rel="import" href="bower_components/paper-button/paper-button.html">
+  <link rel="import" href="bower_components/paper-drawer-panel/paper-drawer-panel.html">
+  <link rel="import" href="bower_components/paper-header-panel/paper-header-panel.html">
+  <link rel="import" href="bower_components/iron-fit-behavior/demo/simple-fit.html">
 
+  <style is="custom-style">
+
+    #paperDrawerPanel [main] {
+      background-color: var(--google-grey-100);
+    }
+
+    #paperDrawerPanel [drawer] {
+      border-right: 1px solid var(--google-grey-300);
+    }
+
+    #paperDrawerPanel[right-drawer] [drawer] {
+      border-left: 1px solid var(--google-grey-300);
+    }
+
+    paper-button {
+      color: white;
+      margin: 10px;
+      background-color: var(--google-blue-700);
+      white-space: nowrap;
+    }
+
+    body {
+      padding: 40px;
+    }
+
+    paper-header-panel {
+      float: left;
+      width: 1040px;
+      height: 780px;
+      margin: 6px;
+    @apply(--shadow-elevation-4dp);
+    }
+
+    poly-map-ol3 {
+      float: left;
+      width: 1024px;
+      height: 768px;
+      margin: 6px;
+    }
+
+    .paper-header {
+      height: 0px;
+      font-size: 16px;
+      line-height: 60px;
+      padding: 0 10px;
+      color: white;
+      transition: height 0.2s;
+    }
+
+    .paper-header.tall {
+      height: 120px;
+    }
+
+    .paper-header.medium-tall {
+      height: 100px;
+      line-height: 50px;
+    }
+
+    .content {
+      width: auto;
+      height: auto;
+    }
+
+    .cover {
+      margin: 12px;
+    }
+
+    .blue .paper-header {
+      background-color: var(--paper-light-blue-500);
+    }
+    .green .content {
+      background: linear-gradient(white, #c8e6c9);
+    }
+
+  </style>
 </head>
 <body>
   <ul class="menu">
@@ -27,11 +112,24 @@
     <li><a href="#/view2">view2</a></li>
   </ul>
 
-  <!--[if lt IE 7]>
-      <p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p>
-  <![endif]-->
+  <!--[if lt IE 7]><p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p><![endif]-->
 
-  <div ng-view></div>
+  <paper-drawer-panel id="paperDrawerPanel" forceNarrow="true" transition="true">
+    <div drawer></div>
+    <div main>
+        <paper-fab paper-drawer-toggle raised mini icon="arrow-forward" >toggle drawer</paper-fab>
+      <div class="layout wrap inline center-center">
+        <paper-header-panel class="blue">
+          <div class="paper-header">DEMO OF THE POLY-MAP-OL3 WEB COMPONENT</div>
+          <div class="content">
+            <poly-map-ol3 UUID="HOLAAAAAAAAAAAA" auto-fit-on-attach class="sized"></poly-map-ol3>
+          </div>
+        </paper-header-panel>
+
+      </div>
+
+    </div>
+  </paper-drawer-panel>
 
   <div>Angular seed app: v<span app-version></span></div>
 
@@ -47,12 +145,5 @@
   <script src="components/version/version-directive.js"></script>
   <script src="components/version/interpolate-filter.js"></script>
 
-
-
-
-
-  <paper-fab icon="add"></paper-fab>
-
-  <paper-fab mini icon="favorite"></paper-fab>
   </body>
 </html>
