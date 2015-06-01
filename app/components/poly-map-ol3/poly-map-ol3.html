@@ -28,7 +28,10 @@
         is: 'poly-map-ol3',
 
        //behaviors: [],
-       //listeners: [],
+       listeners: {
+           'map.click': 'mapClicked' //DANGEROUS: TODO: RELATIONSHIP BETWEEN DOM EVENTS IN OL3 AND THE INTERNAL EVENTS THEMSELVES. WE WANT TO USE THE OL3 EVENTS NOT THE DOM EVENTS. THEN NO DOM EVENTS ARE NEEDED, JUST TO MAP INTERNAL EVENTS IN THE JS PART OF THE POLYMER, THEM USING CUSTOM FIRING EVENTS.
+
+       },
 
         properties: {
             <!-- INTERNAL PROPERTIES -->
@@ -72,6 +75,7 @@
                 });
 
                 this._ol3_map.updateSize();
+                this._ol3_map.
                 console.log('Event READY executed.');
             },
 
