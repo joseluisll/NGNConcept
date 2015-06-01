@@ -3,7 +3,7 @@
  * It can be reused to bundle any map with a JS API. 
  */
 
-var cmapi-wrapper = {
+var cmapi_wrapper = {
   
     // ======================================================================== 
     // Put module level private helper functions here. 
