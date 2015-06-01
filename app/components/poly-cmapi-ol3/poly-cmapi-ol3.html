@@ -1,0 +1,127 @@
+
+
+<!-- Imports polymer -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- Defines element markup -->
+<dom-module id="poly-cmapi-ol3" attributes="UUID">
+
+    <style>
+        :host { display: block; }
+        :host #cmapi {height:0%; width:0%}
+    </style>
+
+    <template>
+        <!-- local DOM for your element -->
+        <div id="cmapi-ol3"></div>
+    </template>
+
+    <!-- CMAPI v.1.3 script and schema -->
+    <script src="../../js/cmapi/dist/tv4.js"></script>
+    <script src="../../js/cmapi/dist/cmapi.schema.js"></script>
+    <script src="../../js/cmapi/dist/cmajs.js"></script>
+    <script src="../../js/cmapi/dist/cmapi.examples.js"></script>
+
+    <!-- JL CUSTOMIZED CMAPI WRAPPER from .EDU project FOR A OL3 MAP!-->
+    <script src="ol3-cmapi-wrapper.js"></script>
+
+
+    <!-- Registers custom element -->
+    <script>
+        "use strict";
+
+        Polymer({
+            is: 'poly-cmapi-ol3',
+
+            //behaviors: [],
+            //listeners: [],
+
+            properties: {
+                <!-- INTERNAL PROPERTIES -->
+
+                _who: {
+                    type: String,
+                    value: 'This is the CMAPI Polymer Wrapper for OL3.'
+                },
+                _ol3_cmapi_wrapper: {
+                    type: Object,
+                    value: null
+                },
+                _cmajs: {
+                    type: Object,
+                    value:null
+                },
+
+                <!-- PUBLIC PROPERTIES -->
+
+                UUID: {
+                    type: String,
+                    value: ""
+                }
+            },
+
+            <!--      LYFECYCLE EVENTS  -->
+            ready: function() {
+                //Lifecycle callback invoked when all local DOM children of this element have been created and "configured" with data bound from this element, attribute values, or defaults.
+                this._cmajs= cmajs;
+                ol3_cmapi_wrapper.cmajs=cmajs;
+                this._ol3_cmapi_wrapper=ol3_cmapi_wrapper;
+                this.UUID=this._cmajs.runtimes.browser.getInstanceId();
+
+
+                //SET THE WRAPPER AS LISTENER FOR THE EVENTS THAT NEED TO BE PROCESSED BY THE MAP AND MAKE
+                //THE MAP NEEDS TO HANDLE A SET OF MESSAGES AS SUBSCRIBER. THE MAP WILL RESPOND IN AN APPROPIATE CHANNEL, PUBLISHING A MESSAGE
+                //TODO: ADD ALL MESSAGES WHERE THE MAP NEEDS TO SUBCRIBE AND PAIR WITH THE APPROPIATE FUNCTION FROM THE WRAPPER
+
+                console.log('CMAPI-OL3-WRAPPER subcribing to '+cmapi.channels.MAP_STATUS_REQUEST);
+
+                this._cmajs.subscribe([{
+                    //QUOTE FROM THE OL3-CMAPI WRAPPER
+                    // Obtain current map status from the map.
+                    // Requests are sent by clients on the request channel.
+                    // The remaining three channels are published to by the map to respond.
+                    channel: cmapi.channels.MAP_STATUS_REQUEST,
+                    callback: this._ol3_cmapi_wrapper.status.request(channel,payload)
+                }]);
+
+                console.log('CMAPI-OL3-WRAPPER is Ready: MODE is Browser and UUID is '+this.UUID);
+            },
+
+            created: function() {
+                console.log('Event created executed.');
+            },
+
+            attached: function() {
+                console.log('Event attached executed.');
+            },
+
+            detached: function() {
+                console.log('Event detached executed.');
+
+            },
+
+            attributeChanged: function(name, type) {
+                console.log('Event attributeChanged executed.');
+            },
+
+            //INTERNAL CMAPI EVENT HANDLERS for SPECIAL CHANNELS
+
+            _handleMessageComplete: function(args) {
+                //CHANNEL: map.message.complete
+                //
+
+            },
+
+            _handleMessageProgress: function(args) {
+                //CHANNEL:map.message.progress
+                //
+            },
+            _handleMessageCancel: function(args) {
+                //CHANNEL:map.message.cancel
+                //
+            }
+
+        });
+    </script>
+
+</dom-module>

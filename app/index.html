@@ -23,12 +23,18 @@
   <link rel="import" href="bower_components/paper-styles/paper-styles.html">
   <link href="bower_components/paper-fab/paper-fab.html" rel="import">
   <link href="bower_components/iron-icons/iron-icons.html" rel="import">
+  <link rel="import" href="bower_components/paper-icon-button/paper-icon-button.html">
 
   <link rel="import" href="components/poly-map-ol3/poly-map-ol3.html">
   <link rel="import" href="bower_components/paper-button/paper-button.html">
   <link rel="import" href="bower_components/paper-drawer-panel/paper-drawer-panel.html">
   <link rel="import" href="bower_components/paper-header-panel/paper-header-panel.html">
   <link rel="import" href="bower_components/iron-fit-behavior/demo/simple-fit.html">
+  <link rel="import" href="bower_components/paper-toolbar/paper-toolbar.html">
+  <link rel="import" href="bower_components/iron-flex-layout/classes/iron-flex-layout.html">
+  <link rel="import" href="bower_components/paper-styles/typography.html">
+  <link rel="import" href="bower_components/paper-material/paper-material.html">
+
 
   <style is="custom-style">
 
@@ -58,7 +64,7 @@
     paper-header-panel {
       float: left;
       width: 1040px;
-      height: 780px;
+      height: 720px;
       margin: 6px;
     @apply(--shadow-elevation-4dp);
     }
@@ -66,7 +72,7 @@
     poly-map-ol3 {
       float: left;
       width: 1024px;
-      height: 768px;
+      height: 700px;
       margin: 6px;
     }
 
@@ -104,6 +110,31 @@
       background: linear-gradient(white, #c8e6c9);
     }
 
+    paper-toolbar + paper-toolbar {
+      margin-top: 20px;
+    }
+
+    paper-material {
+      display: inline-block;
+      background: transparent;
+      box-sizing: border-box;
+      margin: 16px;
+      padding: 16px;
+      border-radius: 2px;
+    }
+
+    .fab {
+      display: inline-block;
+      background: transparent;
+      box-sizing: border-box;
+      width: 56px;
+      height: 56px;
+      margin: 16px;
+      padding: 16px;
+      border-radius: 50%;
+      text-align: center;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -117,11 +148,36 @@
   <paper-drawer-panel id="paperDrawerPanel" forceNarrow="true" transition="true">
     <div drawer></div>
     <div main>
-        <paper-fab paper-drawer-toggle raised mini icon="arrow-forward" >toggle drawer</paper-fab>
+      <paper-fab paper-drawer-toggle raised mini icon="arrow-forward" >toggle drawer</paper-fab>
+
+      <paper-material>
+        <p>BUTTON GROUP 1</p>
+        <paper-fab icon="menu"></paper-fab>
+        <paper-fab icon="arrow-forward">+</paper-fab>
+        <paper-fab icon="refresh"></paper-fab>
+        <paper-fab icon="add">+</paper-fab>
+        <paper-fab icon="menu"></paper-fab>
+      </paper-material>
+
+      <paper-material>
+        <P>BUTTON GROUP 2</P>
+        <paper-fab icon="arrow-forward">+</paper-fab>
+        <paper-fab icon="refresh"></paper-fab>
+        <paper-fab icon="add">+</paper-fab>
+        <paper-fab icon="menu"></paper-fab>
+        <paper-fab icon="arrow-forward">+</paper-fab>
+        <paper-fab icon="refresh"></paper-fab>
+        <paper-fab icon="add">+</paper-fab>
+        <paper-fab icon="menu"></paper-fab>
+      </paper-material>
+
+
       <div class="layout wrap inline center-center">
         <paper-header-panel class="blue">
           <div class="paper-header">DEMO OF THE POLY-MAP-OL3 WEB COMPONENT</div>
           <div class="content">
+
+
             <poly-map-ol3 UUID="HOLAAAAAAAAAAAA" auto-fit-on-attach class="sized"></poly-map-ol3>
           </div>
         </paper-header-panel>
