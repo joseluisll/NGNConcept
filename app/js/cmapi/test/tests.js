@@ -1,4 +1,4 @@
-/*global cmajs, cmapi, QUnit */
+;/*global cmajs, cmapi, QUnit */
 
 QUnit.test("cmajs.utils.isArray", function (assert) {
   assert.expect(2);
