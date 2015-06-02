@@ -1,0 +1,103 @@
+
+
+<!-- Imports polymer -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- Defines element markup -->
+<dom-module id="poly-cmapi-inspector" attributes="UUID">
+
+    <template>
+        <!-- local DOM for your element -->
+        <div id="poly-cmapi-inspector"></div>
+    </template>
+
+    <!-- Registers custom element -->
+    <script>
+        "use strict";
+
+        Polymer({
+            is: 'poly-cmapi-inspector',
+
+            //behaviors: [],
+            //listeners: [],
+
+            properties: {
+                <!-- INTERNAL PROPERTIES -->
+
+                _who: {
+                    type: String,
+                    value: 'This is the INSPECTOR for CMAPI Polymer Wrapper.'
+                },
+
+                <!-- PUBLIC PROPERTIES -->
+
+                UUID: {
+                    type: String,
+                    value: "",
+                    readOnly: true
+                }
+            },
+            _self : {
+                type:Object,
+                value:null
+            },
+
+
+            <!--      LYFECYCLE EVENTS  -->
+            ready: function() {
+                //Lifecycle callback invoked when all local DOM children of this element have been created and "configured" with data bound from this element, attribute values, or defaults.
+                this._subscribeToCMAPIChannels();
+
+                console.log('CMAPI-INSPECTOR Event READY executed.');
+            },
+
+            created: function() {
+                console.log('CMAPI-INSPECTOR Event created executed.');
+            },
+
+            attached: function() {
+                console.log('CMAPI-INSPECTOR Event attached executed.');
+            },
+
+            detached: function() {
+                console.log('CMAPI-INSPECTOR Event detached executed.');
+
+            },
+
+            attributeChanged: function(name, type) {
+                console.log('CMAPI-INSPECTOR Event attributeChanged executed.');
+            },
+
+            _subscribeToCMAPIChannels: function() {
+                var channel;
+                for (channel in cmapi.channel) {
+                    var bol = cmajs.runtimes.browser.pubSub.subscribe({
+                        //QUOTE FROM THE OL3-CMAPI WRAPPER
+                        // Obtain current map status from the map.
+                        // Requests are sent by clients on the request channel.
+                        // The remaining three channels are published to by the map to respond.
+                        channel: cmapi.channel[channel].schema.title,
+                        callback: this._logCMAPIMessage
+                    });
+
+                }
+            },
+            _logCMAPIMessage: function (senderID, payload, channel) {
+                //TODO:ADD A LOCAL DOM NODE WITH THE MESSAGE. THE DOM NODE WILL BE A <P> FOR NOW
+
+                var msg={
+                    "senderID":senderID.id,
+                    "payload":JSON.stringify(payload),
+                    "channel":channel
+                }
+
+                var child=document.createElement('p');
+                child.innerHTML=JSON.stringify(msg);
+                Polymer.dom( document.querySelector('#poly-cmapi-inspector')).appendChild(child);
+                console.debug('CMAPI MESSAGE Received: '+senderID.id+' '+JSON.stringify(payload)+' '+channel);
+            }
+
+        });
+    </script>
+
+</dom-module>
