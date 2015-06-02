@@ -16,7 +16,11 @@ var ol3_cmapi_wrapper = {
         value: ''
     },
 
-    // ======================================================================== 
+    ol3_map: {
+        type: Object,
+        value:null
+    },
+    // ========================================================================
     // Put module level private helper functions here. 
     // ======================================================================== 
     // Note: these functions must be prefaced with 'cmapi.' when calling from 
@@ -562,6 +566,8 @@ var ol3_cmapi_wrapper = {
         
         /**
          * Request the status of the map from the map.
+         * message.sender, message.message, message.channel
+         *
          * The result gets sent out on the associated channel.
          *
          * channel = "map.status.request"
@@ -571,8 +577,8 @@ var ol3_cmapi_wrapper = {
          *        requested. Allowable types are "view", "format", and "about".
          *        If omitted, all status messages will be published.
          */
-        request: function (channel, payload) {
-            console.log('map.status.request triggered');
+        request: function (senderID, payload, channel) {
+            console.log('Received a map.status.request message from '+senderID.id);
             //THE MAP MUST SUBSCRIBE TO THIS MESSAGE!!!
 
             if(payload===undefined) {
@@ -580,8 +586,7 @@ var ol3_cmapi_wrapper = {
                 return;
             }
 
-            //TODO: Add exepction handling for parsing the MSG. In theory it is not needed, as the cmajs publish function validates before publishing
-            var req=JSON.parse(payload);
+            var req=payload;
             var res; //the message for a response.
             var res_payload;//the payload to be embedded into the message.
             var res_channel;//the channel to send the message with the payload.
@@ -594,46 +599,60 @@ var ol3_cmapi_wrapper = {
             }
 
             for (type in payload.types) {
-                switch(type) {
+                switch(payload.types[type]) {
                     case 'view':
-                        console.debug('Publishing a map.status.view response');
-                        res_payload=this.respondWithMapViewStatus();
+                        console.debug('Publishing a map.status.view response for ' + senderID.id);
+                        res_payload=ol3_cmapi_wrapper.status.respondWithMapViewStatus();
                         //GOT THE PAYLOAD
                         //NOW WRAPPIT, AND PUBLISH
-                        //TODO:EXTRACT A TEMPLATE MESSAGE FOR MAP.STATUS.VIEW, ADD THE CORRECT SENDERID, ADD THE PAYLOAD AND PUBLISH IT.
-                        break;
+
+                        res_payload.requester=senderID;
+
+                        var msg = {
+                            channel: "map.status.view",
+                            message: res_payload,
+                        };
+                        console.debug(JSON.stringify(msg));
+                        var bol=cmajs.runtimes.browser.pubSub.publish(msg);
+                        //TODO:PERFORM ERROR CONTROL ON SENDING THE RESPONSE TO A MESSAGE.
+                        if(!bol) {
+                            console.error('An error ocurred sending the map.status.view response to the map.status.request message.');
+                        };
+
+                        continue;
                     case 'about':
                         console.debug('Publishing a map.status.about response');
-                        res_payload=this.respondWithMapAboutStatus();
+                        res_payload=ol3_cmapi_wrapper.status.respondWithMapAboutStatus();
                         //GOT THE PAYLOAD
                         //NOW WRAPPIT, AND PUBLISH
                         //TODO:EXTRACT A TEMPLATE MESSAGE FOR MAP.STATUS.ABOUT, ADD THE CORRECT SENDERID, ADD THE PAYLOAD AND PUBLISH IT.
-                        break;
+                        continue;
 
                     case 'selected':
                         console.debug('Publishing a map.status.selected response');
-                        res_payload=this.respondWithMapSelectedStatus();
+                        res_payload=ol3_cmapi_wrapper.status.respondWithMapSelectedStatus();
                         //GOT THE PAYLOAD
                         //NOW WRAPPIT, AND PUBLISH
                         //TODO:EXTRACT A TEMPLATE MESSAGE FOR MAP.STATUS.SELECTED.VIEW, ADD THE CORRECT SENDERID, ADD THE PAYLOAD AND PUBLISH IT.
-                        break;
+                        continue;
 
                     case 'initialization' :
                         console.debug('Publishing a map.status.initialization response');
-                        res_payload=this.respondWithMapInitializationStatus();
+                        res_payload=ol3_cmapi_wrapper.status.respondWithMapInitializationStatus();
                         //GOT THE PAYLOAD
                         //NOW WRAPPIT, AND PUBLISH
                         //TODO:EXTRACT A TEMPLATE MESSAGE FOR MAP.STATUS.INITIALIZATION., ADD THE CORRECT SENDERID, ADD THE PAYLOAD AND PUBLISH IT.
-                        break;
+                        continue;
 
                     case 'format':
                         console.debug('Publishing a map.status.format response');
-                        res_payload=this.respondWithMapFormatStatus();
+                        res_payload=ol3_cmapi_wrapper.status.respondWithMapFormatStatus();
                         //GOT THE PAYLOAD
                         //NOW WRAPPIT, AND PUBLISH
                         //TODO:EXTRACT A TEMPLATE MESSAGE FOR MAP.STATUS.FORMAT, ADD THE CORRECT SENDERID, ADD THE PAYLOAD AND PUBLISH IT.
-                        break;
-                    //default: NOT NEEDED. VALIDATION DONE ON THE FIRST PLACE.
+                        continue;
+                    default: //NOT NEEDED. VALIDATION DONE ON THE FIRST PLACE.
+                        continue;
                 }
             }
         },
@@ -647,18 +666,61 @@ var ol3_cmapi_wrapper = {
          * bounds  = {southWest: {lat, lon}, northEast: {lat, lon}}
          * center  = {lat, lon}
          */
-        respondWithMapViewStatus: function () {
+        respondWithMapViewStatus: function (senderID) {
 
-            /* TODO: ADAPT THE CODE TO GET THE VIEW STATUS TO OL3. THE OBJECT OL3_MAP DOES NOT EXIST IN THIS CONTEXT, IT WOULD BE THE INTERNAL VARIABLE OF THE POLYMER WRAPPER FOR THE OL3
+            /* TODO: THE PROJECTIONS USED ARE FIXED. NEED TO DETERMINE THE ACTIVE PROJECTION ON THE MAP RIGHT JEJEJE. ALSO THE RANGE IS NOT CALCULATED
             *  getPixelOrigin returns top left corner
             *  SW = (topLeft.y + mapSize, x)
             *  NE = (y, topLeft.x + mapSize)
+            *
+             *return ({/* requester: (optional),
+            *        "bounds": {"southWest": {"lat": ol3_map.getPixelOrigin().y+ol3_map.getSize().y, "lon": ol3_map.getPixelOrigin().x},
+            *                   "northEast": {"lat": ol3_map.getPixelOrigin().y, "lon": ol3_map.getPixelOrigin().x+ol3_map.getSize().x}},
+            *        "center": {"lat": ol3_map.getCenter().lat, "lon": ol3_map.getCenter().lng},
+            *        "range": ol3_map.getZoom() });
             */
-            return ({/* requester: (optional), */
-                    "bounds": {"southWest": {"lat": ol3_map.getPixelOrigin().y+ol3_map.getSize().y, "lon": ol3_map.getPixelOrigin().x},
-                               "northEast": {"lat": ol3_map.getPixelOrigin().y, "lon": ol3_map.getPixelOrigin().x+ol3_map.getSize().x}},
-                    "center": {"lat": ol3_map.getCenter().lat, "lon": ol3_map.getCenter().lng},
-                    "range": ol3_map.getZoom() });
+
+            //The ol3_map variable is set by the polymer cmapi wrapper to the OL3 map object internal to the other Polymer wrapper.
+            //So lets rock!!!!!
+            if(this.ol3_map===undefined){
+                this.ol3_map=document.querySelector('#ol3_map')._ol3_map;
+                this.ol3_map.updateSize();
+                var view=this.ol3_map.getView();
+                view.on('propertychange', ol3_cmapi_wrapper.onMapViewChange,ol3_cmapi_wrapper);
+            }
+            var view=this.ol3_map.getView();
+            var projection=view.getProjection();
+            var meters=projection.getMetersPerUnit();
+            var center= view.getCenter();
+            var center_lonlat = ol.proj.transform(center, 'EPSG:3857', 'EPSG:4326');
+            var center_lon = center_lonlat[0];
+            var center_lat = center_lonlat[1];
+            var projection = view.getProjection();
+            var size=this.ol3_map.getSize();
+            var extent=view.calculateExtent(size);
+            var southWest=[extent[0],extent[1]];
+            var northEast=[extent[2],extent[3]];
+            var southWest_lonlat = ol.proj.transform(southWest, 'EPSG:3857', 'EPSG:4326');
+            var northEast_lonlat = ol.proj.transform(northEast, 'EPSG:3857', 'EPSG:4326');
+
+            return {
+                "requester":"UNKNOWN_YET",
+                "bounds":{
+                    "southWest":{
+                        "lat":southWest_lonlat[1],
+                        "lon":southWest_lonlat[0]
+                    },
+                    "northEast":{
+                        "lat":northEast_lonlat[1],
+                        "lon":northEast_lonlat[0]
+                    }
+                },
+                "center":{
+                    "lat":center_lat,
+                    "lon":center_lon
+                },
+                "range":(-extent[0]+extent[2])/2
+            };
         },
         
         /**
@@ -692,7 +754,15 @@ var ol3_cmapi_wrapper = {
             /* TODO: ADAPT THE CODE TO GET THE ABOUT STATUS TO OL3 OR USE A WRAPPER SPECIFIC INFORMATION!!!. THE OBJECT OL3_MAP DOES NOT EXIST IN THIS CONTEXT, IT WOULD BE THE INTERNAL VARIABLE OF THE POLYMER WRAPPER FOR THE OL3
             */
 
-             return ({"version": "1.0.0", "type": "2D" /*, "widgetName":  map name */});
+             return ({
+                 "version":"1.0.0",
+                 "type":"2-D",
+                 "widgetName":"Common NATO Map API Wrapper for OL3",
+                 "extensions":[
+                     "clustering",
+                     "userManipulation"
+                 ]
+             });
         },
 
         /**
@@ -766,8 +836,30 @@ var ol3_cmapi_wrapper = {
             }
         }
           
-    } 
-      
+    },
+
+    notifyMapViewChange: function () {
+        var payload={
+            "types":[
+                "view"
+            ]
+        };
+        var statusmsg = {
+            channel: "map.status.request",
+            message: payload,
+        };
+        console.debug('The Map View has changed, notifying CMAPI map.status.view subscribers');
+        console.debug(JSON.stringify(statusmsg));
+        var bol=cmajs.runtimes.browser.pubSub.publish(statusmsg);
+        if(!bol) {
+            console.error('There was an error publishing the map.status.request message. ');
+            return;
+        }
+    },
+    onMapViewChange: function(e) {
+        //publish a message into the map.status.request channel...
+        this.notifyMapViewChange();
+    }
 }; 
 
 var geotest = {overlayId: "overlay",

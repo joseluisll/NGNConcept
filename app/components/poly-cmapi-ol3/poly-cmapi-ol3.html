@@ -4,7 +4,7 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
 <!-- Defines element markup -->
-<dom-module id="poly-cmapi-ol3" attributes="UUID">
+<dom-module id="poly-cmapi-ol3" attributes="UUID status interval">
 
     <style>
         :host { display: block; }
@@ -37,34 +37,61 @@
             //listeners: [],
 
             properties: {
-                <!-- INTERNAL PROPERTIES -->
-
-                _who: {
-                    type: String,
-                    value: 'This is the CMAPI Polymer Wrapper for OL3.'
-                },
-                _ol3_cmapi_wrapper: {
-                    type: Object,
-                    value: null
-                },
-                _cmajs: {
-                    type: Object,
-                    value:null
-                },
-
                 <!-- PUBLIC PROPERTIES -->
 
                 UUID: {
                     type: String,
                     value: ""
+                },
+
+                status: {
+                    type:Boolean,
+                    value:true
+                },
+                interval: {
+                    type:Number,
+                    value:100
+                }
+            },
+
+            <!-- INTERNAL PROPERTIES -->
+
+            _who: {
+                type: String,
+                value: 'This is the CMAPI Polymer Wrapper for OL3.'
+            },
+            _ol3_cmapi_wrapper: {
+                type: Object,
+                value: null
+            },
+            _cmajs: {
+                type: Object,
+                value:null
+            },
+
+            _periodicStatus: {
+                enabled: {
+                    type: Boolean,
+                    value: true
+                },
+                interval: {
+                    type:Number,
+                    value:100
                 }
             },
 
             <!--      LYFECYCLE EVENTS  -->
             ready: function() {
+                console.debug('CMAPI Ready Event executing.');
+
+                //INITIALIZE INTERNAL PROPERTIES USING THE ATTRIBUTE VALUES SUPPLIED IN DOM
+                this._periodicStatus.enabled=this.status;
+                this._periodicStatus.interval=this.interval;
+
                 //Lifecycle callback invoked when all local DOM children of this element have been created and "configured" with data bound from this element, attribute values, or defaults.
                 this._cmajs= cmajs;
                 ol3_cmapi_wrapper.cmajs=cmajs;
+                var ol3_map=document.querySelector('#ol3_map')._ol3_map;
                 this._ol3_cmapi_wrapper=ol3_cmapi_wrapper;
                 this.UUID=this._cmajs.runtimes.browser.getInstanceId();
 
@@ -73,35 +100,68 @@
                 //THE MAP NEEDS TO HANDLE A SET OF MESSAGES AS SUBSCRIBER. THE MAP WILL RESPOND IN AN APPROPIATE CHANNEL, PUBLISHING A MESSAGE
                 //TODO: ADD ALL MESSAGES WHERE THE MAP NEEDS TO SUBCRIBE AND PAIR WITH THE APPROPIATE FUNCTION FROM THE WRAPPER
 
-                console.log('CMAPI-OL3-WRAPPER subcribing to '+cmapi.channels.MAP_STATUS_REQUEST);
+                console.log('CMAPI-OL3-WRAPPER subcribing to '+cmajs.channels.MAP_STATUS_REQUEST);
 
-                this._cmajs.subscribe([{
+                var bol=this._cmajs.runtimes.browser.pubSub.subscribe({
                     //QUOTE FROM THE OL3-CMAPI WRAPPER
                     // Obtain current map status from the map.
                     // Requests are sent by clients on the request channel.
                     // The remaining three channels are published to by the map to respond.
-                    channel: cmapi.channels.MAP_STATUS_REQUEST,
-                    callback: this._ol3_cmapi_wrapper.status.request(channel,payload)
-                }]);
+                    channel: cmajs.channels.MAP_STATUS_REQUEST,
+                    callback: this._ol3_cmapi_wrapper.status.request
+                });
+
+                if(!bol) {
+                    console.error('There was an error subscribing to the map.status.request channel. ');
+                    return;
+                }
 
                 console.log('CMAPI-OL3-WRAPPER is Ready: MODE is Browser and UUID is '+this.UUID);
+
+
             },
 
             created: function() {
-                console.log('Event created executed.');
+                console.log('CMAPI Event created executed.');
             },
 
             attached: function() {
-                console.log('Event attached executed.');
+                console.log('CMAPI Event attached executed.');
+
+                //The CMAPI will emit automatically an Status.Request as a keepalieve, unless it is deactivated by configuration.
+                if(this._periodicStatus.enabled) {
+                    console.log('Starting periodic Status Request.');
+                    //TODO: WRITE A PERIODIC WORKER THAT EMITS AN STATUS REQUEST SO THE MAP HAS AN STATUS BEACON!.
+                    var payload={
+                        "types":[
+                            "view",
+                            "about",
+                            "format",
+                            "selected",
+                            "initialization"
+                        ]
+                    };
+                    var statusmsg = {
+                        channel: "map.status.request",
+                        message: payload,
+                    };
+                    console.debug(JSON.stringify(statusmsg));
+                    var bol=this._cmajs.runtimes.browser.pubSub.publish(statusmsg);
+                    if(!bol) {
+                        console.error('There was an error publishing the map.status.request message. ');
+                        return;
+                    }
+
+                }
             },
 
             detached: function() {
-                console.log('Event detached executed.');
+                console.log('CMAPI Event detached executed.');
 
             },
 
             attributeChanged: function(name, type) {
-                console.log('Event attributeChanged executed.');
+                console.log('CMAPI Event attributeChanged executed.');
             },
 
             //INTERNAL CMAPI EVENT HANDLERS for SPECIAL CHANNELS
