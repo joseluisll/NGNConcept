@@ -93,8 +93,12 @@
             },
             handleResponse: function(e) {
                 var self = document.querySelector('#cmapi-datafeed');
-                self._data_feed.push(e.detail.response);
-                console.log(e.detail.response);
+                var PATTERN_TOTAL= "";
+                var PATTERN_STATS= "";
+                var PATTERN_RECORD_ID="";
+                var PATTERN_RECORD_DATA="";
+
+                var data=e.detail.response.toString().replace()
                 //var child=document.createElement('p');
                 //child.innerText=JSON.stringify(e.detail.response);
                 //Polymer.dom( self.root).appendChild(child);
