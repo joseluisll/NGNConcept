@@ -3,6 +3,7 @@
 <!-- Imports polymer -->
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
+
 <!-- Defines element markup -->
 <dom-module id="poly-cmapi-datafeed">
 
@@ -13,7 +14,15 @@
 
     <template>
         <!-- local DOM for your element -->
-        <div id="cmapi-datafeed">
+        <div id="poly-cmapi-datafeed-content">
+            <iron-ajax
+                    auto
+                    url="http://localhost:800/http://krk.data.fr24.com/zones/fcgi/feed.js?bounds=82.74652281376211,-83.44892683138465,5744.8828125,491.8359375&faa=1&mlat=0&flarm=0&adsb=0&gnd=0&air=1&vehicles=0&estimated=1&maxage=3600&gliders=0&stats=1"
+                    handle-as="text"
+                    on-response="handleResponse"
+                    debounce-duration="300">
+
+            </iron-ajax>
         </div>
     </template>
 
@@ -22,6 +31,7 @@
     <script src="../../libs/cmapi/dist/cmapi.schema.js"></script>
     <script src="../../libs/cmapi/dist/cmajs.js"></script>
     <script src="../../libs/cmapi/dist/cmapi.examples.js"></script>
+    <script src="../../bower_components/httpclient/dist/HTTPClient.js"></script>
 
     <!-- Registers custom element -->
     <script>
@@ -41,7 +51,10 @@
             },
 
             <!-- INTERNAL PROPERTIES -->
-
+            _data_feed:{
+                type:Object,
+                value:null
+            },
 
 
 
@@ -53,32 +66,39 @@
 
             <!--      LYFECYCLE EVENTS  -->
             ready: function() {
-                console.debug('CMAPI Ready Event executing.');
-
-
-
-
-                console.log('CMAPI-OL3-WRAPPER is Ready: MODE is Browser and UUID is '+this.UUID);
+                this._data_feed=[];
+                console.debug('CMAPI DATAFEED Ready Event executing.');
 
             },
 
             created: function() {
-                console.log('CMAPI Event created executed.');
+                console.log('CMAPI DATAFEED Event created executed.');
             },
 
             attached: function() {
-                console.log('CMAPI Event attached executed.');
+                console.log('CMAPI DATAFEED Event attached executed.');
+
+
 
             },
 
             detached: function() {
-                console.log('CMAPI Event detached executed.');
+                console.log('CMAPI DATAFEED Event detached executed.');
 
             },
 
             attributeChanged: function(name, type) {
-                console.log('CMAPI Event attributeChanged executed.');
+                console.log('CMAPI DATAFEED Event attributeChanged executed.');
+
             },
+            handleResponse: function(e) {
+                var self = document.querySelector('#cmapi-datafeed');
+                self._data_feed.push(e.detail.response);
+                console.log(e.detail.response);
+                //var child=document.createElement('p');
+                //child.innerText=JSON.stringify(e.detail.response);
+                //Polymer.dom( self.root).appendChild(child);
+            }
 
 
         });

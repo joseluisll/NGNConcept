@@ -1,7 +1,6 @@
 /**
  * Created by Jose Luis on 03/06/2015.
  */
-
 function openMapApp(args) {
     var ref=window.open("http://localhost:63342/NGNConcept/apps/NGNMap-app/index.html","","location=no,menubar=no,toolbar=no",true);
     var cmapiinspector=document.querySelector("#cmapi-inspector");

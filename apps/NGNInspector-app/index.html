@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="../../bower_components/paper-styles/demo.css">
     <link rel="stylesheet" href="../NGNMap-app/app.css">
     <script src="../../bower_components/html5-boilerplate/js/vendor/modernizr-2.6.2.min.js"></script>
-
+    <script src="../../bower_components/webcomponentsjs/webcomponents.js"></script>
 
 
     <link rel="import" href="../../bower_components/paper-styles/paper-styles.html">
@@ -34,6 +34,8 @@
     <link rel="import" href="../../bower_components/paper-material/paper-material.html">
 
     <link rel="import" href="../../components/poly-cmapi-inspector/poly-cmapi-inspector.html">
+
+    <link rel="import" href="../../components/poly-cmapi-datafeed/poly-cmapi-datafeed.html">
 
     <style is="custom-style">
 
@@ -140,23 +142,25 @@
 
 <!--[if lt IE 7]><p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p><![endif]-->
 
-        <script src="app.js"></script>
+<script src="app.js"></script>
 
-        <div class="layout wrap inline center-center">
-            <paper-header-panel class="blue">
-                <div class="paper-header">DEMO OF THE POLY-MAP-OL3 WEB COMPONENT</div>
-                <div class="content">
-                    <paper-toolbar raised>
-                        <paper-button raised onclick="openMapApp()">OPEN MAPAPP</paper-button>
-                        <paper-button raised disabled>CLOSE MAPAPP</paper-button>
-                    </paper-toolbar>
+<div class="layout wrap inline center-center">
+    <paper-header-panel class="blue">
+        <div class="paper-header">DEMO OF THE POLY-MAP-OL3 WEB COMPONENT</div>
+        <div class="content">
+            <paper-toolbar raised>
+                <paper-button raised onclick="openMapApp()">OPEN MAPAPP</paper-button>
+                <paper-button raised disabled>CLOSE MAPAPP</paper-button>
+            </paper-toolbar>
 
-                    <poly-cmapi-inspector id="cmapi-inspector"></poly-cmapi-inspector>
-                </div>
-            </paper-header-panel>
-
+            <poly-cmapi-inspector id="cmapi-inspector"></poly-cmapi-inspector>
         </div>
+    </paper-header-panel>
+</div>
 
+<div>
+        <poly-cmapi-datafeed id="cmapi-datafeed"></poly-cmapi-datafeed>
+</div>
 
 
 </body>
