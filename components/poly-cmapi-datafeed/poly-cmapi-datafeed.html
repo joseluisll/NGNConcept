@@ -1,0 +1,89 @@
+
+
+<!-- Imports polymer -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- Defines element markup -->
+<dom-module id="poly-cmapi-datafeed">
+
+    <style>
+        :host { display: block; }
+        :host #cmapi-datafeed {height:0%; width:0%}
+    </style>
+
+    <template>
+        <!-- local DOM for your element -->
+        <div id="cmapi-datafeed">
+        </div>
+    </template>
+
+    <!-- CMAPI v.1.3 script and schema -->
+    <script src="../../libs/cmapi/dist/tv4.js"></script>
+    <script src="../../libs/cmapi/dist/cmapi.schema.js"></script>
+    <script src="../../libs/cmapi/dist/cmajs.js"></script>
+    <script src="../../libs/cmapi/dist/cmapi.examples.js"></script>
+
+    <!-- Registers custom element -->
+    <script>
+        "use strict";
+
+        Polymer({
+            is: 'poly-cmapi-datafeed',
+
+            //behaviors: [],
+            //listeners: [],
+
+
+            <!-- PUBLIC PROPERTIES -->
+            properties: {
+
+
+            },
+
+            <!-- INTERNAL PROPERTIES -->
+
+
+
+
+
+            <!--   INTERNAL FUNCTIONS EVENTS  -->
+
+
+
+
+            <!--      LYFECYCLE EVENTS  -->
+            ready: function() {
+                console.debug('CMAPI Ready Event executing.');
+
+
+
+
+                console.log('CMAPI-OL3-WRAPPER is Ready: MODE is Browser and UUID is '+this.UUID);
+
+            },
+
+            created: function() {
+                console.log('CMAPI Event created executed.');
+            },
+
+            attached: function() {
+                console.log('CMAPI Event attached executed.');
+
+            },
+
+            detached: function() {
+                console.log('CMAPI Event detached executed.');
+
+            },
+
+            attributeChanged: function(name, type) {
+                console.log('CMAPI Event attributeChanged executed.');
+            },
+
+
+        });
+    </script>
+
+    <script src="poly-cmapi-datafeed.js"></script>
+
+</dom-module>

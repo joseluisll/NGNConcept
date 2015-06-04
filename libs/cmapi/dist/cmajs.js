@@ -625,6 +625,7 @@ var cmajs = (function () {
     cmajs.runtimes.browser.mediator.subscribe({
       channel: args.channel,
       callback: args.callback
+      //TODO: Need to include the this object that will be passed as parameter to the function call
     });
     success = true;
 

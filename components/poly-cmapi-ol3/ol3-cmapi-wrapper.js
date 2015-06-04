@@ -612,7 +612,7 @@ var ol3_cmapi_wrapper = {
                             channel: "map.status.view",
                             message: res_payload,
                         };
-                        console.debug(JSON.stringify(msg));
+                        //console.debug(JSON.stringify(msg));
                         var bol=cmajs.runtimes.browser.pubSub.publish(msg);
                         //TODO:PERFORM ERROR CONTROL ON SENDING THE RESPONSE TO A MESSAGE.
                         if(!bol) {
