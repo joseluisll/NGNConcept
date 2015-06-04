@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<!--[if lt IE 7]>      <html lang="en" ng-app="myApp" class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html lang="en" ng-app="myApp" class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html lang="en" ng-app="myApp" class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html lang="en" ng-app="myApp" class="no-js"> <!--<![endif]-->
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>CMAPI-INSPECTOR WEBCOMPONENT</title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+
+    <link rel="stylesheet" href="../../bower_components/html5-boilerplate/css/normalize.css">
+    <link rel="stylesheet" href="../../bower_components/html5-boilerplate/css/main.css">
+    <link rel="stylesheet" href="../../bower_components/paper-styles/demo.css">
+    <link rel="stylesheet" href="../NGNMap-app/app.css">
+    <script src="../../bower_components/html5-boilerplate/js/vendor/modernizr-2.6.2.min.js"></script>
+
+
+
+    <link rel="import" href="../../bower_components/paper-styles/paper-styles.html">
+    <link href="../../bower_components/paper-fab/paper-fab.html" rel="import">
+    <link href="../../bower_components/iron-icons/iron-icons.html" rel="import">
+    <link rel="import" href="../../bower_components/paper-icon-button/paper-icon-button.html">
+    <link rel="import" href="../../bower_components/iron-ajax/iron-ajax.html">
+    <link rel="import" href="../../bower_components/paper-button/paper-button.html">
+    <link rel="import" href="../../bower_components/paper-drawer-panel/paper-drawer-panel.html">
+    <link rel="import" href="../../bower_components/paper-header-panel/paper-header-panel.html">
+    <link rel="import" href="../../bower_components/iron-fit-behavior/demo/simple-fit.html">
+    <link rel="import" href="../../bower_components/paper-toolbar/paper-toolbar.html">
+    <link rel="import" href="../../bower_components/iron-flex-layout/classes/iron-flex-layout.html">
+    <link rel="import" href="../../bower_components/paper-styles/typography.html">
+    <link rel="import" href="../../bower_components/paper-material/paper-material.html">
+
+    <link rel="import" href="../../components/poly-cmapi-inspector/poly-cmapi-inspector.html">
+
+    <style is="custom-style">
+
+        #paperDrawerPanel [main] {
+            background-color: var(--google-grey-100);
+        }
+
+        #paperDrawerPanel [drawer] {
+            border-right: 1px solid var(--google-grey-300);
+        }
+
+        #paperDrawerPanel[right-drawer] [drawer] {
+            border-left: 1px solid var(--google-grey-300);
+        }
+
+        paper-button {
+            color: white;
+            margin: 10px;
+            background-color: var(--google-blue-700);
+            white-space: nowrap;
+        }
+
+        body {
+            padding: 40px;
+        }
+
+        paper-header-panel {
+            float: left;
+            width: 1040px;
+            height: 620px;
+            margin: 6px;
+        @apply(--shadow-elevation-4dp);
+        }
+
+        poly-map-ol3 {
+            float: left;
+            width: 1024px;
+            height: 600px;
+            margin: 6px;
+        }
+
+        .paper-header {
+            height: 0px;
+            font-size: 16px;
+            line-height: 60px;
+            padding: 0 10px;
+            color: white;
+            transition: height 0.2s;
+        }
+
+        .paper-header.tall {
+            height: 120px;
+        }
+
+        .paper-header.medium-tall {
+            height: 100px;
+            line-height: 50px;
+        }
+
+        .content {
+            width: auto;
+            height: auto;
+        }
+
+        .cover {
+            margin: 12px;
+        }
+
+        .blue .paper-header {
+            background-color: var(--paper-light-blue-500);
+        }
+        .green .content {
+            background: linear-gradient(white, #c8e6c9);
+        }
+
+        paper-toolbar + paper-toolbar {
+            margin-top: 20px;
+        }
+
+        paper-material {
+            display: inline-block;
+            background: transparent;
+            box-sizing: border-box;
+            margin: 16px;
+            padding: 16px;
+            border-radius: 2px;
+        }
+
+        .fab {
+            display: inline-block;
+            background: transparent;
+            box-sizing: border-box;
+            width: 56px;
+            height: 56px;
+            margin: 16px;
+            padding: 16px;
+            border-radius: 50%;
+            text-align: center;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+<!--[if lt IE 7]><p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p><![endif]-->
+
+        <script src="app.js"></script>
+
+        <div class="layout wrap inline center-center">
+            <paper-header-panel class="blue">
+                <div class="paper-header">DEMO OF THE POLY-MAP-OL3 WEB COMPONENT</div>
+                <div class="content">
+                    <paper-toolbar raised>
+                        <paper-button raised onclick="openMapApp()">OPEN MAPAPP</paper-button>
+                        <paper-button raised disabled>CLOSE MAPAPP</paper-button>
+                    </paper-toolbar>
+
+                    <poly-cmapi-inspector id="cmapi-inspector"></poly-cmapi-inspector>
+                </div>
+            </paper-header-panel>
+
+        </div>
+
+
+
+</body>
+</html>

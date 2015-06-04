@@ -599,7 +599,7 @@ var cmajs = (function () {
     var success = false;
 
 
-    cmajs.runtime.browser.mediator.publish({
+    cmajs.runtimes.browser.mediator.publish({
       channel: args.channel,
       message: args.message,
       sender: {
@@ -614,10 +614,18 @@ var cmajs = (function () {
 
   template.pubSub.subscribe = function (args) {
     var success = false;
-
-    cmajs.runtime.browser.mediator.subscribe({
+    if(!args.hasOwnProperty('channel')) {
+      console.error('Need to specify the channel name.');
+      return;
+    }
+    if(!args.hasOwnProperty('callback')) {
+      console.error('Need to specify the callback name.');
+      return;
+    }
+    cmajs.runtimes.browser.mediator.subscribe({
       channel: args.channel,
       callback: args.callback
+      //TODO: Need to include the this object that will be passed as parameter to the function call
     });
     success = true;
 
@@ -627,7 +635,7 @@ var cmajs = (function () {
   template.pubSub.unsubscribe = function (args) {
     var success = false;
 
-    cmajs.runtime.browser.mediator.unsubscribe({
+    cmajs.runtimes.browser.mediator.unsubscribe({
       channel: args.channel,
       callback: args.callback
     });
@@ -679,7 +687,7 @@ var cmajs = (function () {
             i,
             success = {
               success: false,
-              message: "An unanticipated error has occurred in cmajs.runtime.browser.mediator.dispatch"
+              message: "An unanticipated error has occurred in cmajs.runtimes.browser.mediator.dispatch"
             };
 
           try {
@@ -693,6 +701,7 @@ var cmajs = (function () {
                   try {
                     callbacks[i](message.sender, message.message, message.channel);
                   } catch (ignore) {
+                    //TODO:PERFORM ERROR HANDLING WHEN CALLING A CALLBACK ON A CHANNEL
 
                   }
                 }
@@ -709,9 +718,9 @@ var cmajs = (function () {
           return success;
         }
       };
-
     return publicInterface;
   }());
+
 }());
 ;/*global cmajs, tv4 */
 

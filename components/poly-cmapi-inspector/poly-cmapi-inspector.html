@@ -1,0 +1,125 @@
+
+
+<!-- Imports polymer -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- Defines element markup -->
+<dom-module id="poly-cmapi-inspector" attributes="UUID">
+
+    <template>
+        <!-- local DOM for your element -->
+        <div id="cmapi-inspector-content">
+
+        </div>
+    </template>
+
+    <!-- Registers custom element -->
+    <script>
+        "use strict";
+
+        Polymer({
+            is: 'poly-cmapi-inspector',
+
+            //behaviors: [],
+            //listeners: [],
+
+            properties: {
+                <!-- INTERNAL PROPERTIES -->
+
+                _who: {
+                    type: String,
+                    value: 'This is the INSPECTOR for CMAPI Polymer INspector.'
+                },
+
+                <!-- PUBLIC PROPERTIES -->
+
+                UUID: {
+                    type: String,
+                    value: "",
+                    readOnly: true
+                },
+                mode:{
+                    type: String,
+                    value: "standalone"
+                },
+                url:{//URL OF THE APP THAT
+                    type: String,
+                    value: "http://localhost:63342/NGNConcept/app/index.html"
+                },
+            },
+            _self : {
+                type:Object,
+                value:null
+            },
+
+            _cmapi_messages:[],
+
+
+            <!--      LYFECYCLE EVENTS  -->
+            ready: function() {
+                //TODO PUT THE DETECTION OF THE STANDALONE OR INTEGRATED MODE HERE. IF IN STANDALONE MODE, THEN WE CANNOT WORK UNLESS WE OPEN A CHILD DOCUMENT THAT USES A POLYCMAPIOL3 COMPONENT. THE EXISTING CODE IS ONLY FOR INTEGRATED MODE.
+                //Lifecycle callback invoked when all local DOM children of this element have been created and "configured" with data bound from this element, attribute values, or defaults.
+                if(window.cmapi===undefined)  {
+
+                }else {
+                    this._subscribeToCMAPIChannels();
+                }
+
+                console.log('CMAPI-INSPECTOR Event READY executed.');
+            },
+
+            created: function() {
+                console.log('CMAPI-INSPECTOR Event created executed.');
+            },
+
+            attached: function() {
+                console.log('CMAPI-INSPECTOR Event attached executed.');
+            },
+
+            detached: function() {
+                console.log('CMAPI-INSPECTOR Event detached executed.');
+
+            },
+
+            attributeChanged: function(name, type) {
+                console.log('CMAPI-INSPECTOR Event attributeChanged executed.');
+            },
+
+            _subscribeToCMAPIChannels: function() {
+                //TODO ONLY SUBCRIBE WHEN CMAPIOL3 IS AVAILABLE EITHER IN DOCUMENT OR IN PARENT, DEPENDING ON THE MODE OF THE COMPONENT. THE COMPONENT CAN KEEP RETRYING... OR WAIT FOR AN ATTRIBUTECHANGE WHEN THE USER SPECIFIES A URL OR ACTION TO OPEN A CMAPIOL3 COMPONENT.
+                var channel;
+                for (channel in cmapi.channel) {
+                    var bol = cmajs.runtimes.browser.pubSub.subscribe({
+                        //QUOTE FROM THE OL3-CMAPI WRAPPER
+                        // Obtain current map status from the map.
+                        // Requests are sent by clients on the request channel.
+                        // The remaining three channels are published to by the map to respond.
+                        channel: cmapi.channel[channel].schema.title,
+                        callback: this._logCMAPIMessage
+                        //TODO: THE CMAPI PROVIDES CALLBACK BUT THE THIS IS INITIALIZED TO THE ARGUMENTS NOT THE POLYMER OBJECT.
+                    });
+
+                }
+            },
+            _logCMAPIMessage: function (senderID, payload, channel,more,more2,more3) {
+                //TODO:ADD A LOCAL DOM NODE WITH THE MESSAGE. THE DOM NODE WILL BE A <P> FOR NOW. ALSO EVENTS COULD BE FIRED, AS WELL AS PUT THE MESSAGE IN THE DOm OF THE CHANNEL...
+
+                var msg={
+                    "senderID":senderID,
+                    "payload":payload,
+                    "channel":channel
+                };
+                var self = document.querySelector('#cmapi-inspector');
+                if(self!=undefined) self._cmapi_messages.push(msg);
+                var child=document.createElement('p');
+                child.innerText=JSON.stringify(msg);
+                //var node=Polymer.dom(document.createTextNode(JSON.stringify(msg)));
+
+                Polymer.dom( self.root).appendChild(child);
+                //console.debug('CMAPI MESSAGE Received: '+senderID.id+' '+JSON.stringify(payload)+' '+channel);
+            }
+
+        });
+    </script>
+
+</dom-module>
