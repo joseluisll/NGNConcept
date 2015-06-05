@@ -15,11 +15,11 @@
     <template>
         <!-- local DOM for your element -->
         <div id="poly-cmapi-datafeed-content">
-            <iron-ajax
+            <iron-ajax id="ajax_requester"
                     auto
                     url="http://localhost:800/http://krk.data.fr24.com/zones/fcgi/feed.js?bounds=82.74652281376211,-83.44892683138465,5744.8828125,491.8359375&faa=1&mlat=0&flarm=0&adsb=0&gnd=0&air=1&vehicles=0&estimated=1&maxage=3600&gliders=0&stats=1"
                     handle-as="text"
-                    on-response="handleResponse"
+                    on-response="_handleResponse"
                     debounce-duration="300">
 
             </iron-ajax>
@@ -55,6 +55,10 @@
                 type:Object,
                 value:null
             },
+            _cmapi_wrapper: {
+                type:Object,
+                value:null
+            },
 
 
 
@@ -67,6 +71,7 @@
             <!--      LYFECYCLE EVENTS  -->
             ready: function() {
                 this._data_feed=[];
+
                 console.debug('CMAPI DATAFEED Ready Event executing.');
 
             },
@@ -91,17 +96,152 @@
                 console.log('CMAPI DATAFEED Event attributeChanged executed.');
 
             },
-            handleResponse: function(e) {
+            _handleResponse: function(e) {
                 var self = document.querySelector('#cmapi-datafeed');
-                var PATTERN_TOTAL= "";
-                var PATTERN_STATS= "";
-                var PATTERN_RECORD_ID="";
-                var PATTERN_RECORD_DATA="";
+                //{"full_count":9433,"version":4
+                var PATTERN_TOTAL='"version":4';
+                var PATTERN_STATS= ',"stats":{"total":{"';
+                var PATTERN_RECORD='\n';
+                var PATTERN_RECORD_DATA=':';
 
-                var data=e.detail.response.toString().replace()
+                //clean up initial header: the total of records...
+                var data=e.detail.response.toString().split(PATTERN_TOTAL);
+                data=data[1];//discard the total and version header...
+
+                //clean up stats header: the total of records... actually returned, different from the total.
+                var data=data.split(PATTERN_STATS);
+                data=data[0];//discard the stats info.
+
+                //LETS DO SOME CUTTING AND PASTING
+                var aircraft=[];
+                data=data.split(PATTERN_RECORD);
+
+                var counter=0;
+                var aircraft_attributes=null;
+                var index=0;
+                var offset=this._data_feed.length;
+
+                while(true) {
+
+                    data[counter]=data[counter].substring(1,data[counter].length); //cut initial coma
+                    aircraft_attributes=data[counter].split(PATTERN_RECORD_DATA);
+                    aircraft[counter]={};
+                    aircraft[counter].id=aircraft_attributes[0];
+                    aircraft[counter].attributes=JSON.parse(aircraft_attributes[1]);
+                    //check if the aircraft already exists?
+
+                    var index=this._exists(aircraft[counter]);
+                    if(index>=0) {//ya existe, no hace falta anadirlo sino actualizar los atributos del avion
+                        this._data_feed[index].attributes=aircraft[counter].attributes;
+                        if(window.cmapi===undefined)  {//if we are in standalone mode, do nothing...
+
+                        }else { //if we are in integrated mode, then send the cmapi message
+                            this._CMAPI_map_feature_update(aircraft[counter]);
+                        }
+                        continue;
+                    }
+
+                    //el avion no existe, se anade...
+                    this._data_feed[counter+offset]=aircraft[counter];
+
+
+                    //SEND A CMAPI FEATURE ADD!!!!
+
+                    if(window.cmapi===undefined)  {//if we are in standalone mode, do nothing...
+
+                    }else { //if we are in integrated mode, then send the cmapi message
+                        this._CMAPI_map_feature_plot(aircraft[counter]);
+                    }
+
+                    //store the aircraft data into the internal array
+                    //this._data_feed[aircraft.id]=aircraft;
+                    counter++;
+                    if(data[counter+1]===undefined) break;
+                }
+                console.log('Processed '+ counter+' Aircrafts');
+
                 //var child=document.createElement('p');
                 //child.innerText=JSON.stringify(e.detail.response);
                 //Polymer.dom( self.root).appendChild(child);
+                setTimeout(function() {
+                    document.querySelector('#ajax_requester').setAttribute("body",Math.random().toString());
+                },30000);
+            },
+            _exists:function (what){
+                var index=0;
+                var result=-1;
+
+                if(what===undefined) return -1;
+                if(!what.hasOwnProperty('id')) return -1;
+                if(!what.hasOwnProperty('attributes')) return -1;
+
+                for (index in this._data_feed) {
+                    if(this._data_feed[index].id===what.id) {
+                        result=index;
+                    }
+                }
+
+                return result;
+            },
+            _CMAPI_map_feature_plot: function (what) {
+
+                var payload={
+                    "overlayId":"2d882141-0d9e-59d4-20bb-58e6d0460699.1",
+                    "featureId":"example.aoi.1",
+                    "format":"geojson",
+                    "feature":{
+                        "type":"Feature",
+                        "geometry":{
+                            "type":"point",
+                            "coordinates":[
+                                100,
+                                0
+                            ]
+                        }
+                    },
+                    "properties":{
+                        "name":"SampleAOIBufferedpoint(i.e., Point/Radius)",
+                        "aoi":{
+                            "type":"point-radius",
+                            "buffer":1000
+                        },
+                        "style":{
+                            "lineStyle":{
+                                "color":{
+                                    "r":255,
+                                    "g":0,
+                                    "b":255,
+                                    "a":1
+                                }
+                            },
+                            "polyStyle":{
+                                "color":{
+                                    "r":0,
+                                    "g":255,
+                                    "b":25,
+                                    "a":0.5
+                                },
+                                "iconStyle":{
+                                    "url":"http: //www.coolicons.org/icon"
+                                }
+                            },
+                            "id":"0x75023443",
+                            "description":"ThisisimportanttextfortheAOIpopup"
+                        },
+                        "zoom":true,
+                        "readOnly":"false"
+                    }
+                };
+
+                var plotmsg = {
+                    channel: "map.feature.plot",
+                    message: payload
+                };
+                console.debug(JSON.stringify(statusmsg));
+                var bol=this._cmajs.runtimes.browser.pubSub.publish(plotmsg);
+
+            },
+            _CMAPI_map_feature_update: function (what) {
             }
 
 
