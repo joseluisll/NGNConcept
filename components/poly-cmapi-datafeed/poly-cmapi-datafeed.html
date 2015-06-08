@@ -5,7 +5,7 @@
 
 
 <!-- Defines element markup -->
-<dom-module id="poly-cmapi-datafeed">
+<dom-module id="poly-cmapi-datafeed" attributes="url layer_id format">
 
     <style>
         :host { display: block; }
@@ -46,6 +46,62 @@
 
             <!-- PUBLIC PROPERTIES -->
             properties: {
+                url: {
+                    //THIS PROPERTY WILL BE USED TO CONFIGURE THE IRON_AJAX COMPONENT, WHICH IS THE XHR FETCHER!!!. ALSO, THE USE OF A PROXY COULD BE PARAMETERIZED, TO BYPASS A CROSS-DOMAIN EXCHANGE.
+                    //TODO: CONNECT THE IRON_AJAX COMPONENT TO DETECT THE CHANGE ON THE URL, SO THAT IT GRABS THE NEW DATA
+                    type:String,
+                    value:'http://krk.data.fr24.com/zones/fcgi/feed.js?bounds=82.74652281376211,-83.44892683138465,5744.8828125,491.8359375&faa=1&mlat=0&flarm=0&adsb=0&gnd=0&air=1&vehicles=0&estimated=1&maxage=3600&gliders=0&stats=1'
+                },
+                //THIS PROPERTY WILL BE USED AS THE OVERLAY_ID IN THE MAP.FEATURE.PLOT AND UPDATE MESSAGES!!!
+                //TODO: ADD CODE FOR DETECTING CHANGES OF THE LAYER ID. THIS PARAMETER SHOULD BE CONFIGURABLE BY THE USER.
+                layer_id:{
+                    type:String,
+                    value:'UNKNOWN_YET'
+                },
+                //THIS PROPERTY WILL BE USED AS THE format of the feature IN THE MAP.FEATURE.PLOT AND UPDATE MESSAGES!!!
+                //TODO: ADD CODE FOR DETECTING CHANGES OF THE format type. THIS PARAMETER SHOULD BE CONFIGURABLE BY THE USER.
+                format:{
+                    type:String,
+                    value:'geojson'
+                    /*EXTRACT FROM THE OL3 3.5 API DOCUMENT FOR ol.format
+                    *   EsriJSON
+                    *   Feature
+                    *   GeoJSON
+                    *   GML
+                    *   GML2
+                    *   GML3
+                    *   GMLBase
+                    *   GPX
+                    *   IGC
+                    *   JSONFeature
+                    *   KML
+                    *   OSMXML
+                    *   Polyline
+                    *   TextFeature
+                    *   TopoJSON
+                    *   WFS
+                    *   WKT
+                    *   WMSCapabilities
+                    *   WMSGetFeatureInfo
+                    *   WMTSCapabilities
+                    *   XML
+                    *   XMLFeature
+                    *
+                    *CMAPI 1.3RC4 ONLY SPECIFIES FOR THE PLOT MESSAGE {
+                    *   overlayId: string (optional),
+                    *   featureId: string (required),
+                    *   name: string (optional),
+                    *   format: string ["kml", "geojson"] default="kml" (optional),
+                    *   feature: object | string (required),
+                    *   zoom: boolean default=false (optional),
+                    *   readOnly: boolean default=true (optional),
+                    *   properties: object (optional)
+                    *}
+                    *
+                     */
+
+
+                }
 
 
             },
@@ -55,7 +111,7 @@
                 type:Object,
                 value:null
             },
-            _cmapi_wrapper: {
+            _cmajs: {
                 type:Object,
                 value:null
             },
@@ -71,6 +127,7 @@
             <!--      LYFECYCLE EVENTS  -->
             ready: function() {
                 this._data_feed=[];
+
 
                 console.debug('CMAPI DATAFEED Ready Event executing.');
 
@@ -96,6 +153,7 @@
                 console.log('CMAPI DATAFEED Event attributeChanged executed.');
 
             },
+
             _handleResponse: function(e) {
                 var self = document.querySelector('#cmapi-datafeed');
                 //{"full_count":9433,"version":4
@@ -184,52 +242,29 @@
                 return result;
             },
             _CMAPI_map_feature_plot: function (what) {
+                //TODO: ADD ERROR HANDLING FOR THE WHAT.
+
 
                 var payload={
-                    "overlayId":"2d882141-0d9e-59d4-20bb-58e6d0460699.1",
-                    "featureId":"example.aoi.1",
-                    "format":"geojson",
+                    //TODO: THE LAYER_ID MUST BE A CONFIGURABLE PARAMETER OF THE DATAFEED COMPONENT. ALSO, THE OL3MAP SHOULD DEAL WITH THE PROBLEM WHEN THE LAYER DOES NOT EXIST YET. IT WILL BE AUTOMATICALLY CREATED.
+                    "overlayId":this.layer_id,
+                    "featureId":cmajs.utils.getUUID(), //WHEN CREATING A FEATURE, THE ID SHOULD BE RANDOM AND UNIQUE?
+                    "format":this.format,                 //TODO: FORMAT FOR FEATURES SHOULD BE CONFIGURABLE AND ATTRIBUTE OF THE COMPONENT. GEOJSON AS THE DEFAULT.
+                    "crs": {
+                        "type": 'name',
+                        "properties": {
+                            "name": 'EPSG:4326'           //LAT LONG MANDATED BY CMAPI
+                        }
+                    },
                     "feature":{
                         "type":"Feature",
                         "geometry":{
                             "type":"point",
-                            "coordinates":[
-                                100,
-                                0
+                            "coordinates":[             //OBTAINED BY THE DATA_FEED.
+                                what.attributes[1],//0 is registration number, 1 is the lat, 2 is long;
+                                what.attributes[2]
                             ]
                         }
-                    },
-                    "properties":{
-                        "name":"SampleAOIBufferedpoint(i.e., Point/Radius)",
-                        "aoi":{
-                            "type":"point-radius",
-                            "buffer":1000
-                        },
-                        "style":{
-                            "lineStyle":{
-                                "color":{
-                                    "r":255,
-                                    "g":0,
-                                    "b":255,
-                                    "a":1
-                                }
-                            },
-                            "polyStyle":{
-                                "color":{
-                                    "r":0,
-                                    "g":255,
-                                    "b":25,
-                                    "a":0.5
-                                },
-                                "iconStyle":{
-                                    "url":"http: //www.coolicons.org/icon"
-                                }
-                            },
-                            "id":"0x75023443",
-                            "description":"ThisisimportanttextfortheAOIpopup"
-                        },
-                        "zoom":true,
-                        "readOnly":"false"
                     }
                 };
 
@@ -237,11 +272,13 @@
                     channel: "map.feature.plot",
                     message: payload
                 };
-                console.debug(JSON.stringify(statusmsg));
+                console.debug(JSON.stringify(plotmsg));
+                if(this._cmajs!=undefined)
                 var bol=this._cmajs.runtimes.browser.pubSub.publish(plotmsg);
 
             },
             _CMAPI_map_feature_update: function (what) {
+                //what is a copy of the object that contains the data. In this case, id and array of attributes.
             }
 
 

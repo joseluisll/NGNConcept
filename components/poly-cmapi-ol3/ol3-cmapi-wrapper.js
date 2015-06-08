@@ -310,6 +310,8 @@ var ol3_cmapi_wrapper = {
                 overlayId = payload.overlayId;
             }
 
+            //THIS CODE CONTAINS LEAFLET STUFF (L, PANE). TODO: ADAPT THE ADD FEATURE CODE TO OL3
+
             if (payload.format === "geojson") {
                 var obj = new L.geoJson(payload.feature, {pane: overlayId});
                 ol3_map.addLayer(obj);
