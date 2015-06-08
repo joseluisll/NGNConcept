@@ -27,11 +27,11 @@
     </template>
 
     <!-- CMAPI v.1.3 script and schema -->
-    <script src="../../libs/cmapi/dist/tv4.js"></script>
-    <script src="../../libs/cmapi/dist/cmapi.schema.js"></script>
-    <script src="../../libs/cmapi/dist/cmajs.js"></script>
-    <script src="../../libs/cmapi/dist/cmapi.examples.js"></script>
-    <script src="../../bower_components/httpclient/dist/HTTPClient.js"></script>
+    <!--script src="../../libs/cmapi/dist/tv4.js"></script-->
+    <!--script src="../../libs/cmapi/dist/cmapi.schema.js"></script-->
+    <!--script src="../../libs/cmapi/dist/cmajs.js"></script-->
+    <!--script src="../../libs/cmapi/dist/cmapi.examples.js"></script-->
+
 
     <!-- Registers custom element -->
     <script>
@@ -162,6 +162,11 @@
                 var PATTERN_RECORD='\n';
                 var PATTERN_RECORD_DATA=':';
 
+
+                if(window.cmajs!=undefined) {
+                    this._cmajs=window.cmajs;
+                    console.log(window.cmajs)
+                }
                 //clean up initial header: the total of records...
                 var data=e.detail.response.toString().split(PATTERN_TOTAL);
                 data=data[1];//discard the total and version header...
@@ -205,8 +210,8 @@
 
                     //SEND A CMAPI FEATURE ADD!!!!
 
-                    if(window.cmapi===undefined)  {//if we are in standalone mode, do nothing...
-
+                    if(this._cmajs===undefined)  {//if we are in standalone mode, do nothing...
+                        console.log('CMAJS not detected yet.');
                     }else { //if we are in integrated mode, then send the cmapi message
                         this._CMAPI_map_feature_plot(aircraft[counter]);
                     }

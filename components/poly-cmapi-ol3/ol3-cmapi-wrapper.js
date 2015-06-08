@@ -684,13 +684,13 @@ var ol3_cmapi_wrapper = {
 
             //The ol3_map variable is set by the polymer cmapi wrapper to the OL3 map object internal to the other Polymer wrapper.
             //So lets rock!!!!!
-            if(this.ol3_map===undefined){
-                this.ol3_map=document.querySelector('#ol3_map')._ol3_map;
-                this.ol3_map.updateSize();
-                var view=this.ol3_map.getView();
+            if(ol3_cmapi_wrapper.ol3_map===undefined){
+                ol3_cmapi_wrapper.ol3_map=document.querySelector('#ol3_map')._ol3_map;
+                ol3_cmapi_wrapper.ol3_map.updateSize();
+                var view=ol3_cmapi_wrapper.ol3_map.getView();
                 view.on('propertychange', ol3_cmapi_wrapper.onMapViewChange,ol3_cmapi_wrapper);
             }
-            var view=this.ol3_map.getView();
+            var view=ol3_cmapi_wrapper.ol3_map.getView();
             var projection=view.getProjection();
             var meters=projection.getMetersPerUnit();
             var center= view.getCenter();
@@ -698,7 +698,7 @@ var ol3_cmapi_wrapper = {
             var center_lon = center_lonlat[0];
             var center_lat = center_lonlat[1];
             var projection = view.getProjection();
-            var size=this.ol3_map.getSize();
+            var size=ol3_cmapi_wrapper.ol3_map.getSize();
             var extent=view.calculateExtent(size);
             var southWest=[extent[0],extent[1]];
             var northEast=[extent[2],extent[3]];
@@ -818,7 +818,7 @@ var ol3_cmapi_wrapper = {
          * error: a description of the error 
          */
         enableErrorLogging: function () {
-            this.enabled=true;
+            ol3_cmapi_wrapper.logging.enabled=true;
         }, 
   
         /** 
@@ -827,12 +827,12 @@ var ol3_cmapi_wrapper = {
          * NO CHANNEL. 
          */
         disableErrorLogging: function () {
-            this.enabled=false;
+            ol3_cmapi_wrapper.logging.enabled=false;
         } ,
 
 
         publishError: function() {
-            if(this.enabled) {
+            if(ol3_cmapi_wrapper.logging.enabled) {
                 //TODO: ADD CODE FOR PUBLISHING AN ERROR MESSAGE FROM THE MAP HERE.
 
             }
@@ -860,7 +860,7 @@ var ol3_cmapi_wrapper = {
     },
     onMapViewChange: function(e) {
         //publish a message into the map.status.request channel...
-        this.notifyMapViewChange();
+        ol3_cmapi_wrapper.notifyMapViewChange();
     }
 }; 
 
