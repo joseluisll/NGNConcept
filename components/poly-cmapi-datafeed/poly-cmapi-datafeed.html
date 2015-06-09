@@ -20,6 +20,7 @@
                     url="http://localhost:800/http://krk.data.fr24.com/zones/fcgi/feed.js?bounds=82.74652281376211,-83.44892683138465,5744.8828125,491.8359375&faa=1&mlat=0&flarm=0&adsb=0&gnd=0&air=1&vehicles=0&estimated=1&maxage=3600&gliders=0&stats=1"
                     handle-as="text"
                     on-response="_handleResponse"
+                    on-error="_handleError"
                     debounce-duration="300">
 
             </iron-ajax>
@@ -154,6 +155,10 @@
 
             },
 
+            _handleError: function(e) {
+              console.error(e);
+            },
+
             _handleResponse: function(e) {
                 var self = document.querySelector('#cmapi-datafeed');
                 //{"full_count":9433,"version":4
@@ -162,15 +167,33 @@
                 var PATTERN_RECORD='\n';
                 var PATTERN_RECORD_DATA=':';
 
-
-                if(window.cmajs!=undefined) {
-                    this._cmajs=window.cmajs;
-                    console.log(window.cmajs)
+                if(this._cmajs.runtimes==undefined && window.cmajs==undefined) {
+                    console.log('CMAJS not detected.');setTimeout(function() {
+                        document.querySelector('#ajax_requester').setAttribute("body",Math.random().toString());
+                    },3000);
+                    return;
+                }else {
+                    if(window.cmajs!=undefined) {
+                        this._cmajs = window.cmajs;
+                    }else {
+                        setTimeout(function() {
+                            document.querySelector('#ajax_requester').setAttribute("body",Math.random().toString());
+                        },3000);
+                    }
                 }
+
                 //clean up initial header: the total of records...
                 var data=e.detail.response.toString().split(PATTERN_TOTAL);
                 data=data[1];//discard the total and version header...
 
+                //in case there is network problems or data format problems!!!
+                if(data==undefined) {
+                    console.error('There is no data to process.');
+                    setTimeout(function() {
+                        document.querySelector('#ajax_requester').setAttribute("body",Math.random().toString());
+                    },3000);
+                    return;
+                }
                 //clean up stats header: the total of records... actually returned, different from the total.
                 var data=data.split(PATTERN_STATS);
                 data=data[0];//discard the stats info.
@@ -181,11 +204,10 @@
 
                 var counter=0;
                 var aircraft_attributes=null;
-                var index=0;
+                var index=-1;
                 var offset=this._data_feed.length;
-
+                console.debug(offset);
                 while(true) {
-
                     data[counter]=data[counter].substring(1,data[counter].length); //cut initial coma
                     aircraft_attributes=data[counter].split(PATTERN_RECORD_DATA);
                     aircraft[counter]={};
@@ -193,33 +215,38 @@
                     aircraft[counter].attributes=JSON.parse(aircraft_attributes[1]);
                     //check if the aircraft already exists?
 
-                    var index=this._exists(aircraft[counter]);
+                    index=this._exists(aircraft[counter]);
+
                     if(index>=0) {//ya existe, no hace falta anadirlo sino actualizar los atributos del avion
+                        console.debug('Avion existente...');
                         this._data_feed[index].attributes=aircraft[counter].attributes;
-                        if(window.cmapi===undefined)  {//if we are in standalone mode, do nothing...
+                        //if(this._cmajs.runtimes==undefined)  {//if we are in standalone mode, do nothing...
+                            //cannot happen really...
+                        //}else { //if we are in integrated mode, then send the cmapi message
+                        this._CMAPI_map_feature_update(aircraft[counter]);
+                        //}
+                        continue;//ESTE CONTINUE NO ESTABA FUNCIONANDO.
+                    }else {
+                        console.log('cachis en la mar.');
+                        //el avion no existe, se anade...
 
-                        }else { //if we are in integrated mode, then send the cmapi message
-                            this._CMAPI_map_feature_update(aircraft[counter]);
-                        }
-                        continue;
+
+                        //SEND A CMAPI FEATURE ADD!!!!
+
+                        //if(this._cmajs===undefined)  {//if we are in standalone mode, do nothing...
+                        //    console.log('CMAJS not detected yet.');
+                        //cannot happen really
+                        //}else { //if we are in integrated mode, then send the cmapi message
+                        var feautureId = this._CMAPI_map_feature_plot(aircraft[counter]);
+                        aircraft[counter].attributes['feautureId'] = feautureId;//KNOW WE HAVE THE FEATURE ID IN THE MAP PART
+                        this._data_feed[counter + offset] = aircraft[counter];
+                        console.debug(this._data_feed);
+                        //}
+                        //store the aircraft data into the internal array
+                        //this._data_feed[aircraft.id]=aircraft;
+                        counter++;
+                        if (data[counter + 1] == undefined || counter == 3) break;
                     }
-
-                    //el avion no existe, se anade...
-                    this._data_feed[counter+offset]=aircraft[counter];
-
-
-                    //SEND A CMAPI FEATURE ADD!!!!
-
-                    if(this._cmajs===undefined)  {//if we are in standalone mode, do nothing...
-                        console.log('CMAJS not detected yet.');
-                    }else { //if we are in integrated mode, then send the cmapi message
-                        this._CMAPI_map_feature_plot(aircraft[counter]);
-                    }
-
-                    //store the aircraft data into the internal array
-                    //this._data_feed[aircraft.id]=aircraft;
-                    counter++;
-                    if(data[counter+1]===undefined) break;
                 }
                 console.log('Processed '+ counter+' Aircrafts');
 
@@ -228,13 +255,13 @@
                 //Polymer.dom( self.root).appendChild(child);
                 setTimeout(function() {
                     document.querySelector('#ajax_requester').setAttribute("body",Math.random().toString());
-                },30000);
+                },3000);
             },
             _exists:function (what){
                 var index=0;
                 var result=-1;
 
-                if(what===undefined) return -1;
+                if(what==undefined) return -1;
                 if(!what.hasOwnProperty('id')) return -1;
                 if(!what.hasOwnProperty('attributes')) return -1;
 
@@ -249,41 +276,48 @@
             _CMAPI_map_feature_plot: function (what) {
                 //TODO: ADD ERROR HANDLING FOR THE WHAT.
 
-
-                var payload={
-                    //TODO: THE LAYER_ID MUST BE A CONFIGURABLE PARAMETER OF THE DATAFEED COMPONENT. ALSO, THE OL3MAP SHOULD DEAL WITH THE PROBLEM WHEN THE LAYER DOES NOT EXIST YET. IT WILL BE AUTOMATICALLY CREATED.
-                    "overlayId":this.layer_id,
-                    "featureId":cmajs.utils.getUUID(), //WHEN CREATING A FEATURE, THE ID SHOULD BE RANDOM AND UNIQUE?
-                    "format":this.format,                 //TODO: FORMAT FOR FEATURES SHOULD BE CONFIGURABLE AND ATTRIBUTE OF THE COMPONENT. GEOJSON AS THE DEFAULT.
-                    "crs": {
-                        "type": 'name',
-                        "properties": {
-                            "name": 'EPSG:4326'           //LAT LONG MANDATED BY CMAPI
+                if(this._cmajs!=undefined) {
+                    var payload={
+                        //TODO: THE LAYER_ID MUST BE A CONFIGURABLE PARAMETER OF THE DATAFEED COMPONENT. ALSO, THE OL3MAP SHOULD DEAL WITH THE PROBLEM WHEN THE LAYER DOES NOT EXIST YET. IT WILL BE AUTOMATICALLY CREATED.
+                        "overlayId":this.layer_id,
+                        "featureId":this._cmajs.utils.getUUID(), //WHEN CREATING A FEATURE, THE ID SHOULD BE RANDOM AND UNIQUE?
+                        "format":this.format,                 //TODO: FORMAT FOR FEATURES SHOULD BE CONFIGURABLE AND ATTRIBUTE OF THE COMPONENT. GEOJSON AS THE DEFAULT.
+                        "feature":{
+                            "id":null,
+                            "type":"Feature",
+                            "crs": {
+                                "type": 'name',
+                                "properties": {
+                                    "name": 'EPSG:4326'           //LAT LONG MANDATED BY CMAPI
+                                }
+                            },
+                            "geometry":{
+                                "type":"Point",
+                                "coordinates":[             //OBTAINED BY THE DATA_FEED.
+                                    what.attributes[1],//0 is registration number, 1 is the lat, 2 is long;
+                                    what.attributes[2]
+                                ]
+                            }
                         }
-                    },
-                    "feature":{
-                        "type":"Feature",
-                        "geometry":{
-                            "type":"point",
-                            "coordinates":[             //OBTAINED BY THE DATA_FEED.
-                                what.attributes[1],//0 is registration number, 1 is the lat, 2 is long;
-                                what.attributes[2]
-                            ]
-                        }
-                    }
-                };
+                    };
 
-                var plotmsg = {
-                    channel: "map.feature.plot",
-                    message: payload
-                };
-                console.debug(JSON.stringify(plotmsg));
-                if(this._cmajs!=undefined)
-                var bol=this._cmajs.runtimes.browser.pubSub.publish(plotmsg);
+                    payload.feature.id=payload.featureId;
+
+                    var plotmsg = {
+                        channel: "map.feature.plot",
+                        message: payload
+                    };
+
+                    var bol=this._cmajs.runtimes.browser.pubSub.publish(plotmsg);
+
+                    return payload.featureId;
+                }
+
 
             },
             _CMAPI_map_feature_update: function (what) {
                 //what is a copy of the object that contains the data. In this case, id and array of attributes.
+                console.debug('Feature update not Implemented YET.');
             }
 
 

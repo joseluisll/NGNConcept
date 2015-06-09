@@ -103,16 +103,32 @@
                 console.log('CMAPI-OL3-WRAPPER subcribing to '+cmajs.channels.MAP_STATUS_REQUEST);
 
                 var bol=this._cmajs.runtimes.browser.pubSub.subscribe({
-                    //QUOTE FROM THE OL3-CMAPI WRAPPER
-                    // Obtain current map status from the map.
-                    // Requests are sent by clients on the request channel.
-                    // The remaining three channels are published to by the map to respond.
                     channel: cmajs.channels.MAP_STATUS_REQUEST,
                     callback: this._ol3_cmapi_wrapper.status.request
                 });
 
                 if(!bol) {
                     console.error('There was an error subscribing to the map.status.request channel. ');
+                    return;
+                }
+
+                bol=this._cmajs.runtimes.browser.pubSub.subscribe({
+                    channel: cmajs.channels.MAP_FEATURE_PLOT,
+                    callback: this._ol3_cmapi_wrapper.feature.plotFeature
+                });
+
+                if(!bol) {
+                    console.error('There was an error subscribing to the map.feature.plot channel. ');
+                    return;
+                }
+
+                bol=this._cmajs.runtimes.browser.pubSub.subscribe({
+                    channel: cmajs.channels.MAP_FEATURE_UPDATE,
+                    callback: this._ol3_cmapi_wrapper.feature.featureUpdate
+                });
+
+                if(!bol) {
+                    console.error('There was an error subscribing to the map.feature.plot channel. ');
                     return;
                 }
 

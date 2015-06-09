@@ -103,19 +103,25 @@ var ol3_cmapi_wrapper = {
             } 
   
             // now create the overlay and add to map 
-            newOverlay = L.featureGroup(); 
-            newOverlay.addTo(ol3_map);
-            ol3_map.getPanes()[id] = ""; //TODO: shoudl remove features before doing this
+            console.debug('Creating Empty Layer in OpenLayers 3 API.');
+            var vectorSource = new ol.source.Vector({});
+            var new_Layer = new ol.layer.Vector({'source':vectorSource});
 
-            // add to overlay data store 
+            try {
+                ol3_cmapi_wrapper.ol3_map.addLayer(new_Layer);
+            }catch(err) {
+                console.error(err.message);
+            }
+            console.debug('Added the empty Layer to the OL3 MAP...');
+            // add to overlay data store
             ol3_cmapi_wrapper.overlays[id] = {
-                obj: newOverlay, 
-                name: name, 
-                parent: parentId, 
+                obj: new_Layer,
+                name: name,
+                parent: parentId,
                 children: {}
-            } 
-  
-            console.log('Created new overlay with id ' + id); 
+            };
+
+            console.log('Created new overlay with id ' + id);
             console.log(ol3_cmapi_wrapper.overlays[id]);
         }, 
           
@@ -295,32 +301,229 @@ var ol3_cmapi_wrapper = {
          */ 
         plotFeature: function (channel, payload) { 
             console.log('map.feature.plot triggered'); 
-            var overlayId;
+            var overlayId="AIRCRAFT24";//TODO: How to transmit back the Overlay ID to the Data Feed???
+            var geojsonObject=payload.feature;
 
-            // if (_.isEmpty(payload.featureId) || _.isEmpty(payload.feature)) {
-            //     console.log("FeatureID & Feature attributes are required");
-            // }
-
-            // Create overlay id
-            if (_.isEmpty(payload.overlayId) ||
-                _.isEmpty(ol3_cmapi_wrapper.overlays[payload.overlayId])) {
-                overlayId = ol3_cmapi_wrapper.createGuid();
-                ol3_cmapi_wrapper.overlay.create('channel', {overlayId: overlayId});
-            } else { // Overlay exists.
-                overlayId = payload.overlayId;
-            }
-
-            //THIS CODE CONTAINS LEAFLET STUFF (L, PANE). TODO: ADAPT THE ADD FEATURE CODE TO OL3
-
-            if (payload.format === "geojson") {
-                var obj = new L.geoJson(payload.feature, {pane: overlayId});
-                ol3_map.addLayer(obj);
-                ol3_cmapi_wrapper.feature.features[payload.featureId] =
+            if (!payload.hasOwnProperty('overlayId') ||
+                (ol3_cmapi_wrapper.overlays[payload.overlayId]==undefined)) {
+                console.debug('The Overlay does NOT exist...');
+                overlayId = "AIRCRAFT24"; //TODO: How to transmit back the Overlay ID to the Data Feed??? . ol3_cmapi_wrapper.createGuid();
+                payload.overlayId = overlayId; //ADDED for HACK.
+                ol3_cmapi_wrapper.overlay.create(channel, {overlayId: overlayId});
+                /*var geojsonObject = {
+                    'type': 'FeatureCollection',
+                    'crs': {
+                        'type': 'name',
+                        'properties': {
+                            'name': 'EPSG:3857'
+                        }
+                    },
+                    'features': [
+                        {
+                            'type': 'Feature',
+                            'geometry': {
+                                'type': 'Point',
+                                'coordinates': [0, 0]
+                            }
+                        },
+                        {
+                            'type': 'Feature',
+                            'geometry': {
+                                'type': 'LineString',
+                                'coordinates': [[4e6, -2e6], [8e6, 2e6]]
+                            }
+                        },
+                        {
+                            'type': 'Feature',
+                            'geometry': {
+                                'type': 'LineString',
+                                'coordinates': [[4e6, 2e6], [8e6, -2e6]]
+                            }
+                        },
+                        {
+                            'type': 'Feature',
+                            'geometry': {
+                                'type': 'Polygon',
+                                'coordinates': [[[-5e6, -1e6], [-4e6, 1e6], [-3e6, -1e6]]]
+                            }
+                        },
+                        {
+                            'type': 'Feature',
+                            'geometry': {
+                                'type': 'MultiLineString',
+                                'coordinates': [
+                                    [[-1e6, -7.5e5], [-1e6, 7.5e5]],
+                                    [[1e6, -7.5e5], [1e6, 7.5e5]],
+                                    [[-7.5e5, -1e6], [7.5e5, -1e6]],
+                                    [[-7.5e5, 1e6], [7.5e5, 1e6]]
+                                ]
+                            }
+                        },
+                        {
+                            'type': 'Feature',
+                            'geometry': {
+                                'type': 'MultiPolygon',
+                                'coordinates': [
+                                    [[[-5e6, 6e6], [-5e6, 8e6], [-3e6, 8e6], [-3e6, 6e6]]],
+                                    [[[-2e6, 6e6], [-2e6, 8e6], [0, 8e6], [0, 6e6]]],
+                                    [[[1e6, 6e6], [1e6, 8e6], [3e6, 8e6], [3e6, 6e6]]]
+                                ]
+                            }
+                        },
+                        {
+                            'type': 'Feature',
+                            'geometry': {
+                                'type': 'GeometryCollection',
+                                'geometries': [
+                                    {
+                                        'type': 'LineString',
+                                        'coordinates': [[-5e6, -5e6], [0, -5e6]]
+                                    },
+                                    {
+                                        'type': 'Point',
+                                        'coordinates': [4e6, -5e6]
+                                    },
+                                    {
+                                        'type': 'Polygon',
+                                        'coordinates': [[[1e6, -6e6], [2e6, -4e6], [3e6, -6e6]]]
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                };
+                */
+                var vectorSource=ol3_cmapi_wrapper.overlays[payload.overlayId].obj.getSource();
+                var obj;
+                if (payload.format === "geojson") {
+                    var parser=new ol.format.GeoJSON();
+                    obj=parser.readFeatures(geojsonObject);
+                    vectorSource.addFeatures(obj);
+                    ol3_cmapi_wrapper.feature.features[payload.featureId] =
                     {marker: obj,
                         overlayId: overlayId};
-                // TODO: Should check if it exists, if it does remove -> add new one
-                //cmapi.overlay.overlays[overlayId].children[featureId] = obj;
-            }   
+
+                }else {
+                    console.error('Processing of formats different from GeoJSON not implemented.');
+                }
+
+                ol3_cmapi_wrapper.overlays[overlayId].children[payload.featureId] = obj;//ADD A REFERECE TO THE FEATURE OBJECT
+                //IN THE OVERLAY AS CHILDREN!
+                var image = new ol.style.Circle({
+                    radius: 5,
+                    fill: null,
+                    stroke: new ol.style.Stroke({color: 'red', width: 1})
+                });
+
+                var styles = {
+                    'Point': [new ol.style.Style({
+                        image: image
+                    })],
+                    'LineString': [new ol.style.Style({
+                        stroke: new ol.style.Stroke({
+                            color: 'green',
+                            width: 1
+                        })
+                    })],
+                    'MultiLineString': [new ol.style.Style({
+                        stroke: new ol.style.Stroke({
+                            color: 'green',
+                            width: 1
+                        })
+                    })],
+                    'MultiPoint': [new ol.style.Style({
+                       image: image //I DONT HAVE IMAGESSS
+                    })],
+                    'MultiPolygon': [new ol.style.Style({
+                        stroke: new ol.style.Stroke({
+                            color: 'yellow',
+                            width: 1
+                        }),
+                        fill: new ol.style.Fill({
+                            color: 'rgba(255, 255, 0, 0.1)'
+                        })
+                    })],
+                    'Polygon': [new ol.style.Style({
+                        stroke: new ol.style.Stroke({
+                            color: 'blue',
+                            lineDash: [4],
+                            width: 3
+                        }),
+                        fill: new ol.style.Fill({
+                            color: 'rgba(0, 0, 255, 0.1)'
+                        })
+                    })],
+                    'GeometryCollection': [new ol.style.Style({
+                        stroke: new ol.style.Stroke({
+                            color: 'magenta',
+                            width: 2
+                        }),
+                        fill: new ol.style.Fill({
+                            color: 'magenta'
+                        }),
+                        image: new ol.style.Circle({
+                            radius: 10,
+                            fill: null,
+                            stroke: new ol.style.Stroke({
+                                color: 'magenta'
+                            })
+                        })
+                    })],
+                    'Circle': [new ol.style.Style({
+                        stroke: new ol.style.Stroke({
+                            color: 'red',
+                            width: 2
+                        }),
+                        fill: new ol.style.Fill({
+                            color: 'rgba(255,0,0,0.2)'
+                        })
+                    })]
+                };
+
+                var styleFunction = function(feature, resolution) {
+                    return styles[feature.getGeometry().getType()];
+                };
+
+                var vectorLayer = new ol.layer.Vector({
+                    source: vectorSource,
+                    style: styleFunction
+                });
+
+                ol3_cmapi_wrapper.ol3_map.addLayer(vectorLayer);
+
+            } else { // Overlay exists.
+
+                var layer=ol3_cmapi_wrapper.overlays[payload.overlayId];
+                var vectorSource=ol3_cmapi_wrapper.overlays[payload.overlayId].obj.getSource();
+                var feature=layer.children[payload.featureId];
+                if (payload.format == "geojson") {
+                    //The feature may exist or not...
+                    if(feature==undefined) {
+                        //add a new feature to the Layer source...
+                        console.debug('It is a new feature...');
+                            var parser = new ol.format.GeoJSON();
+                            obj = parser.readFeatures(geojsonObject);
+                            vectorSource.addFeatures(obj);
+                        ol3_cmapi_wrapper.feature.features[payload.featureId] =
+                        {
+                            marker: obj,
+                            overlayId: overlayId
+                        };
+                        ol3_cmapi_wrapper.ol3_map.render();//TODO:THIS IS INEFFICIENT. MUST BE A BATCH, REFRESH ONLY ONCE.
+
+                    }else {
+                        //update the lat / long of an existing feature contained in the Layer Source...
+                        console.debug('Updating of existing features not IMPLEMENTED YET.');
+                        //REDIRECT TO THE UPDATE FEATURE FUNCTION CALL???
+                    }
+
+                }else {
+                    console.debug("Processing of NOT GEOJSON formats is not IMPLEMENTED.");
+                }
+
+            }
+
+
 
         }, 
           
@@ -684,12 +887,13 @@ var ol3_cmapi_wrapper = {
 
             //The ol3_map variable is set by the polymer cmapi wrapper to the OL3 map object internal to the other Polymer wrapper.
             //So lets rock!!!!!
-            if(ol3_cmapi_wrapper.ol3_map===undefined){
+            if(ol3_cmapi_wrapper.ol3_map.getView==undefined){
                 ol3_cmapi_wrapper.ol3_map=document.querySelector('#ol3_map')._ol3_map;
                 ol3_cmapi_wrapper.ol3_map.updateSize();
                 var view=ol3_cmapi_wrapper.ol3_map.getView();
                 view.on('propertychange', ol3_cmapi_wrapper.onMapViewChange,ol3_cmapi_wrapper);
             }
+
             var view=ol3_cmapi_wrapper.ol3_map.getView();
             var projection=view.getProjection();
             var meters=projection.getMetersPerUnit();
@@ -899,7 +1103,7 @@ var geotest = {overlayId: "overlay",
          }
        }
      ]
-   } 
+   }
 };
 
 //cmapi.feature.plotFeature('channel', geotest);

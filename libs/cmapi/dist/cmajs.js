@@ -702,7 +702,7 @@ var cmajs = (function () {
                     callbacks[i](message.sender, message.message, message.channel);
                   } catch (ignore) {
                     //TODO:PERFORM ERROR HANDLING WHEN CALLING A CALLBACK ON A CHANNEL
-
+                    console.error(ignore);
                   }
                 }
               }

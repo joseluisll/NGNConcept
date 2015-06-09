@@ -47,7 +47,7 @@
                     value: "http://localhost:63342/NGNConcept/app/index.html"
                 },
             },
-            _self : {
+            _cmajs : {
                 type:Object,
                 value:null
             },
@@ -59,10 +59,24 @@
             ready: function() {
                 //TODO PUT THE DETECTION OF THE STANDALONE OR INTEGRATED MODE HERE. IF IN STANDALONE MODE, THEN WE CANNOT WORK UNLESS WE OPEN A CHILD DOCUMENT THAT USES A POLYCMAPIOL3 COMPONENT. THE EXISTING CODE IS ONLY FOR INTEGRATED MODE.
                 //Lifecycle callback invoked when all local DOM children of this element have been created and "configured" with data bound from this element, attribute values, or defaults.
-                if(window.cmapi===undefined)  {
 
-                }else {
-                    this._subscribeToCMAPIChannels();
+
+                var self=this;
+
+                setTimeout(check_condition,30000);
+                function check_condition() {
+                    if(window.cmajs==undefined && self._cmajs.runtimes==undefined)  {
+                        console.log('CMAJS is not available yet.');
+                        setTimeout(check_condition,30000);
+                    }else {
+                        if(window.cmajs!=undefined) {
+                            console.log('CMAJS is available now.');
+                            self._cmajs=window.cmajs;
+                            self._subscribeToCMAPIChannels();
+                        }else {
+                            setTimeout(check_condition,30000);
+                        }
+                    }
                 }
 
                 console.log('CMAPI-INSPECTOR Event READY executed.');
@@ -88,6 +102,7 @@
             _subscribeToCMAPIChannels: function() {
                 //TODO ONLY SUBCRIBE WHEN CMAPIOL3 IS AVAILABLE EITHER IN DOCUMENT OR IN PARENT, DEPENDING ON THE MODE OF THE COMPONENT. THE COMPONENT CAN KEEP RETRYING... OR WAIT FOR AN ATTRIBUTECHANGE WHEN THE USER SPECIFIES A URL OR ACTION TO OPEN A CMAPIOL3 COMPONENT.
                 var channel;
+
                 for (channel in cmapi.channel) {
                     var bol = cmajs.runtimes.browser.pubSub.subscribe({
                         //QUOTE FROM THE OL3-CMAPI WRAPPER
@@ -99,9 +114,13 @@
                         //TODO: THE CMAPI PROVIDES CALLBACK BUT THE THIS IS INITIALIZED TO THE ARGUMENTS NOT THE POLYMER OBJECT.
                     });
 
+                    if(!bol) {
+                        console.error('There was an error subscribing to the CMAPI channels.');
+                    }
+
                 }
             },
-            _logCMAPIMessage: function (senderID, payload, channel,more,more2,more3) {
+            _logCMAPIMessage: function (senderID, payload, channel) {
                 //TODO:ADD A LOCAL DOM NODE WITH THE MESSAGE. THE DOM NODE WILL BE A <P> FOR NOW. ALSO EVENTS COULD BE FIRED, AS WELL AS PUT THE MESSAGE IN THE DOm OF THE CHANNEL...
 
                 var msg={
