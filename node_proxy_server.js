@@ -41,7 +41,7 @@ http.createServer(function(request, response) {
                 response.end();
             });
             //proxy_response.headers['access-control-allow-headers']='x-powered-by';
-            //delete proxy_response.headers['access-control-allow-origin'];
+            delete proxy_response.headers['access-control-allow-origin'];
             console.log(proxy_response.headers);
             response.writeHead(proxy_response.statusCode, proxy_response.headers);
         });

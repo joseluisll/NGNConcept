@@ -17,11 +17,11 @@
         <div id="poly-cmapi-datafeed-content">
             <iron-ajax id="ajax_requester"
                     auto
-                    url="http://localhost:800/http://krk.data.fr24.com/zones/fcgi/feed.js?bounds=82.74652281376211,-83.44892683138465,5744.8828125,491.8359375&faa=1&mlat=0&flarm=0&adsb=0&gnd=0&air=1&vehicles=0&estimated=1&maxage=3600&gliders=0&stats=1"
+                    url="http://localhost:800/http://krk.data.fr24.com/zones/fcgi/feed.js?bounds=44.25387985393522,36.0535349811456,-12.125566406250982,0.120849609375&faa=1&mlat=1&flarm=1&adsb=1&gnd=0&air=1&vehicles=0&estimated=1&maxage=900&gliders=0&stats=1&"
                     handle-as="text"
                     on-response="_handleResponse"
                     on-error="_handleError"
-                    debounce-duration="300">
+                    debounce-duration="600">
 
             </iron-ajax>
         </div>
@@ -51,7 +51,7 @@
                     //THIS PROPERTY WILL BE USED TO CONFIGURE THE IRON_AJAX COMPONENT, WHICH IS THE XHR FETCHER!!!. ALSO, THE USE OF A PROXY COULD BE PARAMETERIZED, TO BYPASS A CROSS-DOMAIN EXCHANGE.
                     //TODO: CONNECT THE IRON_AJAX COMPONENT TO DETECT THE CHANGE ON THE URL, SO THAT IT GRABS THE NEW DATA
                     type:String,
-                    value:'http://krk.data.fr24.com/zones/fcgi/feed.js?bounds=82.74652281376211,-83.44892683138465,5744.8828125,491.8359375&faa=1&mlat=0&flarm=0&adsb=0&gnd=0&air=1&vehicles=0&estimated=1&maxage=3600&gliders=0&stats=1'
+                    value:'http://krk.data.fr24.com/zones/fcgi/feed.js?bounds=44.25387985393522,36.0535349811456,-12.125566406250982,0.120849609375&faa=1&mlat=0&flarm=0&adsb=0&gnd=0&air=1&vehicles=0&estimated=1&maxage=3600&gliders=0&stats=1'
                 },
                 //THIS PROPERTY WILL BE USED AS THE OVERLAY_ID IN THE MAP.FEATURE.PLOT AND UPDATE MESSAGES!!!
                 //TODO: ADD CODE FOR DETECTING CHANGES OF THE LAYER ID. THIS PARAMETER SHOULD BE CONFIGURABLE BY THE USER.
@@ -170,7 +170,8 @@
                 if(this._cmajs.runtimes==undefined && window.cmajs==undefined) {
                     console.log('CMAJS not detected.');setTimeout(function() {
                         document.querySelector('#ajax_requester').setAttribute("body",Math.random().toString());
-                    },3000);
+                        return;
+                    },1000);
                     return;
                 }else {
                     if(window.cmajs!=undefined) {
@@ -178,12 +179,25 @@
                     }else {
                         setTimeout(function() {
                             document.querySelector('#ajax_requester').setAttribute("body",Math.random().toString());
-                        },3000);
+                        },1000);
+                        return;
                     }
                 }
 
+                var data=null;
+                var aircraft=[];
+                var counter=0;
+                var aircraft_attributes=null;
+                var index=-1;
+
+                data=null;
+                counter=0;
+                aircraft=[];
+                aircraft_attributes=null;
+                index=-1;
+
                 //clean up initial header: the total of records...
-                var data=e.detail.response.toString().split(PATTERN_TOTAL);
+                data=e.detail.response.toString().split(PATTERN_TOTAL);
                 data=data[1];//discard the total and version header...
 
                 //in case there is network problems or data format problems!!!
@@ -191,23 +205,18 @@
                     console.error('There is no data to process.');
                     setTimeout(function() {
                         document.querySelector('#ajax_requester').setAttribute("body",Math.random().toString());
-                    },3000);
+                    },1000);
                     return;
                 }
                 //clean up stats header: the total of records... actually returned, different from the total.
-                var data=data.split(PATTERN_STATS);
+                data=data.split(PATTERN_STATS);
                 data=data[0];//discard the stats info.
-
-                //LETS DO SOME CUTTING AND PASTING
-                var aircraft=[];
                 data=data.split(PATTERN_RECORD);
 
-                var counter=0;
-                var aircraft_attributes=null;
-                var index=-1;
-                var offset=this._data_feed.length;
-                console.debug(offset);
+                //console.debug(this._data_feed.length);
+
                 while(true) {
+                    //console.log('START of while...');
                     data[counter]=data[counter].substring(1,data[counter].length); //cut initial coma
                     aircraft_attributes=data[counter].split(PATTERN_RECORD_DATA);
                     aircraft[counter]={};
@@ -218,16 +227,22 @@
                     index=this._exists(aircraft[counter]);
 
                     if(index>=0) {//ya existe, no hace falta anadirlo sino actualizar los atributos del avion
-                        console.debug('Avion existente...');
+                        //console.debug('Avion existente...');
+                        aircraft[counter].featureId= this._data_feed[index].featureId;//get the existing THE FEATURE ID!!!!!!
                         this._data_feed[index].attributes=aircraft[counter].attributes;
                         //if(this._cmajs.runtimes==undefined)  {//if we are in standalone mode, do nothing...
                             //cannot happen really...
                         //}else { //if we are in integrated mode, then send the cmapi message
-                        this._CMAPI_map_feature_update(aircraft[counter]);
+                        this._CMAPI_map_feature_plot(aircraft[counter]);//when the feature exists, it should be considered a refresh of data, except when the name or the overlay whants to be changed, then use the featureUpdate
                         //}
+                        counter++;
+                        if (data[counter + 1] == undefined) {
+                            //console.log('FIN BUCLE_EXISTE:'+counter);
+                            break;
+                        }
                         continue;//ESTE CONTINUE NO ESTABA FUNCIONANDO.
                     }else {
-                        console.log('cachis en la mar.');
+                        //console.log('Nuevo AVION.');
                         //el avion no existe, se anade...
 
 
@@ -237,25 +252,33 @@
                         //    console.log('CMAJS not detected yet.');
                         //cannot happen really
                         //}else { //if we are in integrated mode, then send the cmapi message
-                        var feautureId = this._CMAPI_map_feature_plot(aircraft[counter]);
-                        aircraft[counter].attributes['feautureId'] = feautureId;//KNOW WE HAVE THE FEATURE ID IN THE MAP PART
-                        this._data_feed[counter + offset] = aircraft[counter];
-                        console.debug(this._data_feed);
+                        var featureId = this._CMAPI_map_feature_plot(aircraft[counter]);
+                        aircraft[counter].featureId = featureId;//KNOW WE HAVE THE FEATURE ID IN THE MAP PART
+                        //console.debug(aircraft[counter]);
+                        this._data_feed.push(aircraft[counter]);
                         //}
                         //store the aircraft data into the internal array
                         //this._data_feed[aircraft.id]=aircraft;
                         counter++;
-                        if (data[counter + 1] == undefined || counter == 3) break;
+                        if (data[counter + 1] == undefined) {
+                            //console.log('FIN BUCLE_NOEXISTE:'+counter);
+                            break;
+                        }
                     }
                 }
-                console.log('Processed '+ counter+' Aircrafts');
-
+                //console.log('Processed '+ counter+' Aircrafts');
+                counter=0;
+                data=null;
+                aircraft=[];
+                aircraft_attributes=null;
+                index=-1;
                 //var child=document.createElement('p');
                 //child.innerText=JSON.stringify(e.detail.response);
                 //Polymer.dom( self.root).appendChild(child);
                 setTimeout(function() {
                     document.querySelector('#ajax_requester').setAttribute("body",Math.random().toString());
-                },3000);
+                },1000);
+                return;
             },
             _exists:function (what){
                 var index=0;
@@ -294,14 +317,17 @@
                             "geometry":{
                                 "type":"Point",
                                 "coordinates":[             //OBTAINED BY THE DATA_FEED.
-                                    what.attributes[1],//0 is registration number, 1 is the lat, 2 is long;
-                                    what.attributes[2]
+                                    what.attributes[2],//0 is registration number, 2 is the lat, 1 is long;
+                                    what.attributes[1]
                                 ]
                             }
                         }
                     };
-
+                    if(what.hasOwnProperty('featureId')) {
+                        payload.featureId=what.featureId;
+                    }
                     payload.feature.id=payload.featureId;
+
 
                     var plotmsg = {
                         channel: "map.feature.plot",
@@ -318,6 +344,10 @@
             _CMAPI_map_feature_update: function (what) {
                 //what is a copy of the object that contains the data. In this case, id and array of attributes.
                 console.debug('Feature update not Implemented YET.');
+                //find the Layer
+
+                //find the feature
+                //console.log(what);
             }
 
 

@@ -300,7 +300,7 @@ var ol3_cmapi_wrapper = {
          *       readOnly: (optional)}
          */ 
         plotFeature: function (channel, payload) { 
-            console.log('map.feature.plot triggered'); 
+            //console.log('map.feature.plot triggered');
             var overlayId="AIRCRAFT24";//TODO: How to transmit back the Overlay ID to the Data Feed???
             var geojsonObject=payload.feature;
 
@@ -310,105 +310,28 @@ var ol3_cmapi_wrapper = {
                 overlayId = "AIRCRAFT24"; //TODO: How to transmit back the Overlay ID to the Data Feed??? . ol3_cmapi_wrapper.createGuid();
                 payload.overlayId = overlayId; //ADDED for HACK.
                 ol3_cmapi_wrapper.overlay.create(channel, {overlayId: overlayId});
-                /*var geojsonObject = {
-                    'type': 'FeatureCollection',
-                    'crs': {
-                        'type': 'name',
-                        'properties': {
-                            'name': 'EPSG:3857'
-                        }
-                    },
-                    'features': [
-                        {
-                            'type': 'Feature',
-                            'geometry': {
-                                'type': 'Point',
-                                'coordinates': [0, 0]
-                            }
-                        },
-                        {
-                            'type': 'Feature',
-                            'geometry': {
-                                'type': 'LineString',
-                                'coordinates': [[4e6, -2e6], [8e6, 2e6]]
-                            }
-                        },
-                        {
-                            'type': 'Feature',
-                            'geometry': {
-                                'type': 'LineString',
-                                'coordinates': [[4e6, 2e6], [8e6, -2e6]]
-                            }
-                        },
-                        {
-                            'type': 'Feature',
-                            'geometry': {
-                                'type': 'Polygon',
-                                'coordinates': [[[-5e6, -1e6], [-4e6, 1e6], [-3e6, -1e6]]]
-                            }
-                        },
-                        {
-                            'type': 'Feature',
-                            'geometry': {
-                                'type': 'MultiLineString',
-                                'coordinates': [
-                                    [[-1e6, -7.5e5], [-1e6, 7.5e5]],
-                                    [[1e6, -7.5e5], [1e6, 7.5e5]],
-                                    [[-7.5e5, -1e6], [7.5e5, -1e6]],
-                                    [[-7.5e5, 1e6], [7.5e5, 1e6]]
-                                ]
-                            }
-                        },
-                        {
-                            'type': 'Feature',
-                            'geometry': {
-                                'type': 'MultiPolygon',
-                                'coordinates': [
-                                    [[[-5e6, 6e6], [-5e6, 8e6], [-3e6, 8e6], [-3e6, 6e6]]],
-                                    [[[-2e6, 6e6], [-2e6, 8e6], [0, 8e6], [0, 6e6]]],
-                                    [[[1e6, 6e6], [1e6, 8e6], [3e6, 8e6], [3e6, 6e6]]]
-                                ]
-                            }
-                        },
-                        {
-                            'type': 'Feature',
-                            'geometry': {
-                                'type': 'GeometryCollection',
-                                'geometries': [
-                                    {
-                                        'type': 'LineString',
-                                        'coordinates': [[-5e6, -5e6], [0, -5e6]]
-                                    },
-                                    {
-                                        'type': 'Point',
-                                        'coordinates': [4e6, -5e6]
-                                    },
-                                    {
-                                        'type': 'Polygon',
-                                        'coordinates': [[[1e6, -6e6], [2e6, -4e6], [3e6, -6e6]]]
-                                    }
-                                ]
-                            }
-                        }
-                    ]
-                };
-                */
+
                 var vectorSource=ol3_cmapi_wrapper.overlays[payload.overlayId].obj.getSource();
                 var obj;
+                var coord=null;
                 if (payload.format === "geojson") {
+                    coord=geojsonObject.geometry.coordinates;
+                    //console.log(geojsonObject.geometry.coordinates);
+                    //geojsonObject.geometry.coordinates=ol.proj.transform([coord[0], coord[1]], 'EPSG:4326', 'EPSG:3857');
+                    //console.log(geojsonObject.geometry.coordinates);
                     var parser=new ol.format.GeoJSON();
-                    obj=parser.readFeatures(geojsonObject);
-                    vectorSource.addFeatures(obj);
+                    obj=parser.readFeature(geojsonObject);
+                    vectorSource.addFeature(obj);
                     ol3_cmapi_wrapper.feature.features[payload.featureId] =
                     {marker: obj,
                         overlayId: overlayId};
 
+                    ol3_cmapi_wrapper.overlays[overlayId].children[payload.featureId] = obj;//ADD A REFERECE TO THE FEATURE OBJECT
                 }else {
                     console.error('Processing of formats different from GeoJSON not implemented.');
                 }
 
-                ol3_cmapi_wrapper.overlays[overlayId].children[payload.featureId] = obj;//ADD A REFERECE TO THE FEATURE OBJECT
-                //IN THE OVERLAY AS CHILDREN!
+
                 var image = new ol.style.Circle({
                     radius: 5,
                     fill: null,
@@ -494,28 +417,39 @@ var ol3_cmapi_wrapper = {
             } else { // Overlay exists.
 
                 var layer=ol3_cmapi_wrapper.overlays[payload.overlayId];
-                var vectorSource=ol3_cmapi_wrapper.overlays[payload.overlayId].obj.getSource();
+                //console.log(layer.children);
+                vectorSource=ol3_cmapi_wrapper.overlays[payload.overlayId].obj.getSource();
                 var feature=layer.children[payload.featureId];
+                coord=null;
                 if (payload.format == "geojson") {
                     //The feature may exist or not...
+
                     if(feature==undefined) {
                         //add a new feature to the Layer source...
-                        console.debug('It is a new feature...');
-                            var parser = new ol.format.GeoJSON();
-                            obj = parser.readFeatures(geojsonObject);
-                            vectorSource.addFeatures(obj);
+                        //console.debug('It is a new feature...');
+                        coord=geojsonObject.geometry.coordinates;
+                        //console.log(geojsonObject.geometry.coordinates);
+                        //geojsonObject.geometry.coordinates=ol.proj.transform([coord[0], coord[1]], 'EPSG:4326', 'EPSG:3857');
+                        //console.log(geojsonObject.geometry.coordinates);
+                        parser = new ol.format.GeoJSON();
+                        obj = parser.readFeature(geojsonObject);
+                        vectorSource.addFeature(obj);
+                        ol3_cmapi_wrapper.overlays[overlayId].children[payload.featureId] = obj;//ADD A REFERECE TO THE FEATURE OBJECT
                         ol3_cmapi_wrapper.feature.features[payload.featureId] =
                         {
                             marker: obj,
                             overlayId: overlayId
                         };
-                        ol3_cmapi_wrapper.ol3_map.render();//TODO:THIS IS INEFFICIENT. MUST BE A BATCH, REFRESH ONLY ONCE.
 
                     }else {
                         //update the lat / long of an existing feature contained in the Layer Source...
-                        console.debug('Updating of existing features not IMPLEMENTED YET.');
-                        //REDIRECT TO THE UPDATE FEATURE FUNCTION CALL???
+                        coord=geojsonObject.geometry.coordinates;
+                        //console.debug(feature);
+                        //console.debug(feature.setGeometry);
+                        feature.setGeometry(new ol.geom.Point(coord));
                     }
+
+
 
                 }else {
                     console.debug("Processing of NOT GEOJSON formats is not IMPLEMENTED.");
@@ -523,6 +457,7 @@ var ol3_cmapi_wrapper = {
 
             }
 
+            ol3_cmapi_wrapper.ol3_map.render();//TODO:THIS IS INEFFICIENT. MUST BE A BATCH, REFRESH ONLY ONCE.
 
 
         }, 
@@ -1066,45 +1001,4 @@ var ol3_cmapi_wrapper = {
         //publish a message into the map.status.request channel...
         ol3_cmapi_wrapper.notifyMapViewChange();
     }
-}; 
-
-var geotest = {overlayId: "overlay",
-    featureId: "test",
-    format: "geojson",
-    feature: { "type": "FeatureCollection",
-    "features": [
-    { "type": "Feature",
-      "geometry": {"type": "Point", "coordinates": [102.0, 0.5]},
-      "properties": {"prop0": "value0"}
-      },
-    { "type": "Feature",
-      "geometry": {
-        "type": "LineString",
-        "coordinates": [
-          [102.0, 0.0], [103.0, 1.0], [104.0, 0.0], [105.0, 1.0]
-          ]
-        },
-      "properties": {
-        "prop0": "value0",
-        "prop1": 0.0
-        }
-      },
-    { "type": "Feature",
-       "geometry": {
-         "type": "Polygon",
-         "coordinates": [
-           [ [100.0, 0.0], [101.0, 0.0], [101.0, 1.0],
-             [100.0, 1.0], [100.0, 0.0] ]
-           ]
-       },
-       "properties": {
-         "prop0": "value0",
-         "prop1": {"this": "that"}
-         }
-       }
-     ]
-   }
 };
-
-//cmapi.feature.plotFeature('channel', geotest);
-//map.setView({lat:102.0, lng:0.5});
