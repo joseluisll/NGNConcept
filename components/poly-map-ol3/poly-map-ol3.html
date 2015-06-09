@@ -19,7 +19,7 @@
     </template>
 
 
-<script src="../../libs/ol3/ol-debug.js"></script>
+<script src="../../libs/ol3/ol.js"></script>
 <!-- Registers custom element -->
 <script>
     "use strict";
@@ -58,7 +58,7 @@
             ready: function() {
             //Lifecycle callback invoked when all local DOM children of this element have been created and "configured" with data bound from this element, attribute values, or defaults.
 
-                this._ol3_map = new ol.Map({
+            /*    this._ol3_map = new ol.Map({
                     target: this.$.map,  // The DOM element that will contain the map
                     renderer: 'canvas', // Force the renderer to be used
                     layers: [
@@ -70,6 +70,33 @@
                     // Create a view centered on the specified location and zoom level
                     view: new ol.View({
                         center: ol.proj.transform([2.1833, 41.3833], 'EPSG:4326', 'EPSG:3857'),
+                        zoom: 6
+                    })
+                });*/
+
+                var layers = [
+                    new ol.layer.Tile({
+                        source: new ol.source.TileWMS({
+                            url: 'http://demo.boundlessgeo.com/geoserver/wms',
+                            params: {
+                                'LAYERS': 'ne:NE1_HR_LC_SR_W_DR'
+                            }
+                        })
+                    })
+                ];
+
+                this._ol3_map = new ol.Map({
+                    controls: ol.control.defaults().extend([
+                        new ol.control.ScaleLine({
+                            units: 'degrees'
+                        })
+                    ]),
+                    target: this.$.map,  // The DOM element that will contain the map
+                    renderer: 'canvas',
+                    layers: layers,
+                    view: new ol.View({
+                        projection: 'EPSG:4326',
+                        center: [2.1833, 41.3833],
                         zoom: 6
                     })
                 });
