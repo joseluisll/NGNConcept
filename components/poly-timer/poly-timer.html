@@ -1,0 +1,75 @@
+
+
+<!-- Imports polymer -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- Defines element markup -->
+<dom-module id="poly-pouchdb" attributes="UUID">
+
+    <template>
+        <!-- local DOM for your element -->
+        <div id="pouchdb"></div>
+    </template>
+
+
+<script src="../../bower_components/pouchdb/dist/pouchdb.idb-alt.js"></script>
+
+<!-- Registers custom element -->
+<script>
+    "use strict";
+
+    Polymer({
+        is: 'poly-pouch',
+
+       //behaviors: [],
+       //listeners: {},
+
+        properties: {
+            <!-- INTERNAL PROPERTIES -->
+
+            _who: {
+                type: String,
+                value: 'This is the PouchDB Polymer Wrapper.'
+            },
+            _pouchdb: {
+                type: Object,
+                value: null
+            },
+
+            <!-- PUBLIC PROPERTIES -->
+
+            UUID: {
+                type: String,
+                value: "",
+                readOnly: true
+            }
+        },
+
+            <!--      LYFECYCLE EVENTS  -->
+            ready: function() {
+            //Lifecycle callback invoked when all local DOM children of this element have been created and "configured" with data bound from this element, attribute values, or defaults.
+
+                console.log('Event READY executed.');
+            },
+
+            created: function() {
+                console.log('Event created executed.');
+            },
+
+            attached: function() {
+                console.log('Event attached executed.');
+            },
+
+            detached: function() {
+                console.log('Event detached executed.');
+
+            },
+
+            attributeChanged: function(name, type) {
+                console.log('Event attributeChanged executed.');
+            }
+
+    });
+</script>
+
+</dom-module>
