@@ -4,11 +4,11 @@
 <link rel="import" href="../../bower_components/polymer/polymer.html">
 
 <!-- Defines element markup -->
-<dom-module id="poly-timer" attributes="UUID">
+<dom-module id="poly-pouchdb" attributes="UUID">
 
     <template>
         <!-- local DOM for your element -->
-        <div id="timer"></div>
+        <div id="pouchdb"></div>
     </template>
 
 
@@ -19,7 +19,7 @@
     "use strict";
 
     Polymer({
-        is: 'poly-timer',
+        is: 'poly-pouch',
 
        //behaviors: [],
        //listeners: {},
@@ -30,6 +30,10 @@
             _who: {
                 type: String,
                 value: 'This is the PouchDB Polymer Wrapper.'
+            },
+            _pouchdb: {
+                type: Object,
+                value: null
             },
 
             <!-- PUBLIC PROPERTIES -->
@@ -44,12 +48,7 @@
             <!--      LYFECYCLE EVENTS  -->
             ready: function() {
             //Lifecycle callback invoked when all local DOM children of this element have been created and "configured" with data bound from this element, attribute values, or defaults.
-                if(typeof(Worker) !== "undefined") {
-                    // Yes! Web worker support!
-                    // Some code.....
-                } else {
-                    // Sorry! No Web Worker support..
-                }
+
                 console.log('Event READY executed.');
             },
 
