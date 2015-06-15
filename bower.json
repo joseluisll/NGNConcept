@@ -14,7 +14,8 @@
     "paper-elements": "PolymerElements/paper-elements#1.0.1",
     "iron-ajax": "PolymerElements/iron-ajax#~1.0.0",
     "iron-image": "PolymerElements/iron-image#~1.0.0",
-    "ol3": "openlayers/ol3#~3.5.0"
+    "ol3": "openlayers/ol3#~3.5.0",
+    "pouchdb": "~3.6.0"
   },
   "resolutions": {
     "webcomponentsjs": "^0.7.2",

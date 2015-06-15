@@ -1,0 +1,1 @@
+Este componente se encarga de generar ticks por medio de un WebWorker.
