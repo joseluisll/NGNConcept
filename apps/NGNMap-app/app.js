@@ -10,3 +10,8 @@ angular.module('myApp', [
 config(['$routeProvider', function($routeProvider) {
   $routeProvider.otherwise({redirectTo: '/view1'});
 }]);
+
+function enable3D() {
+  var ol3_map=document.querySelector("#polimap-ol3cesium");
+  ol3_map.enable3D();
+}

@@ -21,7 +21,7 @@
                     handle-as="text"
                     on-response="_handleResponse"
                     on-error="_handleError"
-                    debounce-duration="600">
+                    debounce-duration="0">
 
             </iron-ajax>
         </div>
@@ -171,7 +171,7 @@
                     console.log('CMAJS not detected.');setTimeout(function() {
                         document.querySelector('#ajax_requester').setAttribute("body",Math.random().toString());
                         return;
-                    },1000);
+                    },5000);
                     return;
                 }else {
                     if(window.cmajs!=undefined) {
@@ -179,7 +179,7 @@
                     }else {
                         setTimeout(function() {
                             document.querySelector('#ajax_requester').setAttribute("body",Math.random().toString());
-                        },1000);
+                        },5000);
                         return;
                     }
                 }
@@ -205,7 +205,7 @@
                     console.error('There is no data to process.');
                     setTimeout(function() {
                         document.querySelector('#ajax_requester').setAttribute("body",Math.random().toString());
-                    },1000);
+                    },5000);
                     return;
                 }
                 //clean up stats header: the total of records... actually returned, different from the total.
@@ -277,7 +277,7 @@
                 //Polymer.dom( self.root).appendChild(child);
                 setTimeout(function() {
                     document.querySelector('#ajax_requester').setAttribute("body",Math.random().toString());
-                },1000);
+                },5000);
                 return;
             },
             _exists:function (what){
@@ -321,6 +321,9 @@
                                     what.attributes[1]
                                 ]
                             }
+                        },
+                        properties: {
+                            "z":what.attributes[4]
                         }
                     };
                     if(what.hasOwnProperty('featureId')) {

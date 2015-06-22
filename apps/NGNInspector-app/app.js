@@ -12,3 +12,4 @@ function openMapApp(args) {
     }, 3000);
     return ref;
 };
+

@@ -67,14 +67,14 @@ var ol3_cmapi_wrapper = {
             var name, id, parentId; 
             var newOverlay; 
   
-            console.log('map.overlay.create triggered'); 
+            //console.log('map.overlay.create triggered');
   
             // get id from payload or create new one 
             if (payload.hasOwnProperty('overlayId')) { 
                 id = payload.overlayId; 
                 // if overlay already exists, exit 
                 if (ol3_cmapi_wrapper.overlays.hasOwnProperty(id)) {
-                    console.log('overlay with id ' + id + 'already exists'); 
+                    //console.log('overlay with id ' + id + 'already exists');
                     return; 
                 } 
             } else { 
@@ -103,7 +103,7 @@ var ol3_cmapi_wrapper = {
             } 
   
             // now create the overlay and add to map 
-            console.debug('Creating Empty Layer in OpenLayers 3 API.');
+            //console.debug('Creating Empty Layer in OpenLayers 3 API.');
             var vectorSource = new ol.source.Vector({});
             var new_Layer = new ol.layer.Vector({'source':vectorSource});
 
@@ -112,7 +112,7 @@ var ol3_cmapi_wrapper = {
             }catch(err) {
                 console.error(err.message);
             }
-            console.debug('Added the empty Layer to the OL3 MAP...');
+            //console.debug('Added the empty Layer to the OL3 MAP...');
             // add to overlay data store
             ol3_cmapi_wrapper.overlays[id] = {
                 obj: new_Layer,
@@ -121,8 +121,8 @@ var ol3_cmapi_wrapper = {
                 children: {}
             };
 
-            console.log('Created new overlay with id ' + id);
-            console.log(ol3_cmapi_wrapper.overlays[id]);
+            //console.log('Created new overlay with id ' + id);
+            //console.log(ol3_cmapi_wrapper.overlays[id]);
         }, 
           
         /** 
@@ -136,12 +136,12 @@ var ol3_cmapi_wrapper = {
         remove: function (channel, payload) { 
             var id, overlay, overlayObj; 
   
-            console.log('map.overlay.remove triggered'); 
+            //console.log('map.overlay.remove triggered');
   
             // Case 1: no overlayId passed 
             if (!payload.hasOwnProperty('overlayId')) { 
                 // TODO: no default overlays for now 
-                console.log('no default overlays for now'); 
+                //console.log('no default overlays for now');
                 return; 
             } 
   
@@ -149,7 +149,7 @@ var ol3_cmapi_wrapper = {
   
             // Case 2: overlay with passed id doesn't exist 
             if (!ol3_cmapi_wrapper.overlays.hasOwnProperty(id)) {
-                console.log('no overlay with id ' + id + ' exists'); 
+                //console.log('no overlay with id ' + id + ' exists');
                 return; 
             } 
   
@@ -166,12 +166,12 @@ var ol3_cmapi_wrapper = {
                 if (feature === id) {
                     delete ol3_cmapi_wrapper.feature.features[key]
                 }
-                console.log('child overlay with id ' + id + ' removed'); 
+                //console.log('child overlay with id ' + id + ' removed');
             } 
             // and then delete the overlay in storage 
             delete ol3_cmapi_wrapper.overlays[id];
   
-            console.log('overlay with id ' + id + ' removed'); 
+            //console.log('overlay with id ' + id + ' removed');
         }, 
           
         /** 
@@ -184,21 +184,21 @@ var ol3_cmapi_wrapper = {
          *      http://jsfiddle.net/b7LgG/3/
          */ 
         hide: function (channel, payload) { 
-            console.log('map.overlay.hide triggered');
+            //console.log('map.overlay.hide triggered');
             if (!payload.hasOwnProperty("overlayId")) {
-                console.log("Payload did not have overlayId to hide");
+                //console.log("Payload did not have overlayId to hide");
                 return;
             }
 
             if (!ol3_cmapi_wrapper.overlays.hasOwnProperty(payload.overlayId)) {
-                console.log("Overlay doesn't exist to hide: " + payload.overlayId);
+                //console.log("Overlay doesn't exist to hide: " + payload.overlayId);
                 return;
             }
 
             // Hide map pane (features with current overlayId)
             $(ol3_map.getPane(payload.overlayId)).hide();
 
-            console.log("Overlay: " + payload.overlayId + " was hidden.");
+            //console.log("Overlay: " + payload.overlayId + " was hidden.");
 
         }, 
           
@@ -213,20 +213,20 @@ var ol3_cmapi_wrapper = {
          *      http://jsfiddle.net/b7LgG/3/
          */ 
         show: function (channel, payload) { 
-            console.log('map.overlay.show triggered'); 
+            //console.log('map.overlay.show triggered');
             if (!payload.hasOwnProperty("overlayId")) {
-                console.log("Payload did not have overlayId to hide");
+                //console.log("Payload did not have overlayId to hide");
                 return;
             }
 
             if (!ol3_cmapi_wrapper.overlays.hasOwnProperty(payload.overlayId)) {
-                console.log("Overlay doesn't exist to hide: " + payload.overlayId);
+                //console.log("Overlay doesn't exist to hide: " + payload.overlayId);
                 return;
             }
 
             // Show map pane (features with current overlayId)
             $(ol3_map.getPane(payload.overlayId)).show();
-            console.log("Overlay: " + payload.overlayId + " was shown.");
+            //console.log("Overlay: " + payload.overlayId + " was shown.");
         }, 
   
         /** 
@@ -238,11 +238,11 @@ var ol3_cmapi_wrapper = {
          *            parentId (optional)} 
          */ 
         update: function (channel, payload) { 
-            console.log('map.overlay.update triggered'); 
+            //console.log('map.overlay.update triggered');
 
             //TODO: Add default widget ID implementation
             if (!payload.hasOwnProperty("overlayId")) {
-                console.log("Map update error: overlay ID does not exist in payload");
+                //console.log("Map update error: overlay ID does not exist in payload");
                 return;
             } else { // Update attributes
                 //TODO: feature.features needs to be updated too
@@ -262,8 +262,8 @@ var ol3_cmapi_wrapper = {
                     } 
                 }
             }
-            console.log("Overlay was successfully update");
-            console.log("Value: " + overlay);
+            //console.log("Overlay was successfully update");
+            //console.log("Value: " + overlay);
         } 
     }, 
   
@@ -306,7 +306,7 @@ var ol3_cmapi_wrapper = {
 
             if (!payload.hasOwnProperty('overlayId') ||
                 (ol3_cmapi_wrapper.overlays[payload.overlayId]==undefined)) {
-                console.debug('The Overlay does NOT exist...');
+                //console.debug('The Overlay does NOT exist...');
                 overlayId = "AIRCRAFT24"; //TODO: How to transmit back the Overlay ID to the Data Feed??? . ol3_cmapi_wrapper.createGuid();
                 payload.overlayId = overlayId; //ADDED for HACK.
                 ol3_cmapi_wrapper.overlay.create(channel, {overlayId: overlayId});
@@ -421,6 +421,8 @@ var ol3_cmapi_wrapper = {
                 vectorSource=ol3_cmapi_wrapper.overlays[payload.overlayId].obj.getSource();
                 var feature=layer.children[payload.featureId];
                 coord=null;
+                var old_geometry;
+
                 if (payload.format == "geojson") {
                     //The feature may exist or not...
 
@@ -433,6 +435,13 @@ var ol3_cmapi_wrapper = {
                         //console.log(geojsonObject.geometry.coordinates);
                         parser = new ol.format.GeoJSON();
                         obj = parser.readFeature(geojsonObject);
+
+                        if(payload.properties['z']!=undefined) {
+                            coord[2] = payload.properties['z']*4;
+                            old_geometry=obj.getGeometry();
+                            old_geometry=null;
+                            obj.setGeometry(new ol.geom.Point(coord))
+                        }
                         vectorSource.addFeature(obj);
                         ol3_cmapi_wrapper.overlays[overlayId].children[payload.featureId] = obj;//ADD A REFERECE TO THE FEATURE OBJECT
                         ol3_cmapi_wrapper.feature.features[payload.featureId] =
@@ -446,13 +455,20 @@ var ol3_cmapi_wrapper = {
                         coord=geojsonObject.geometry.coordinates;
                         //console.debug(feature);
                         //console.debug(feature.setGeometry);
+
+                        old_geometry=feature.getGeometry();
+                        if(payload.properties['z']!=undefined) {
+                            coord[2] = payload.properties['z']*4;
+                        }
+                        //console.debug(coord);
                         feature.setGeometry(new ol.geom.Point(coord));
+                        old_geometry=null;
                     }
 
 
 
                 }else {
-                    console.debug("Processing of NOT GEOJSON formats is not IMPLEMENTED.");
+                    //console.debug("Processing of NOT GEOJSON formats is not IMPLEMENTED.");
                 }
 
             }
@@ -469,7 +485,7 @@ var ol3_cmapi_wrapper = {
          * payload = {overlayId, featureId, featureName, format, url, zoom} 
          */ 
         plotURL: function (channel, payload) { 
-            console.log('map.feature.plot.url triggered'); 
+            //console.log('map.feature.plot.url triggered');
         }, 
           
         /** 
@@ -479,11 +495,11 @@ var ol3_cmapi_wrapper = {
          * payload = {overlayId, featureId} 
          */ 
         unplotFeature: function (channel, payload) { 
-            console.log('map.feature.unplot triggered'); 
+            //console.log('map.feature.unplot triggered');
             //TODO: Add error checking.
             ol3_map.removeLay(ol3_cmapi_wrapper.feature.features[payload.featureId].marker);
             delete ol3_cmapi_wrapper.feature.features[payload.featureId];
-            console.log('Feature removed'); 
+            //console.log('Feature removed');
         }, 
           
         /** 
@@ -494,7 +510,7 @@ var ol3_cmapi_wrapper = {
          * payload = {overlayId, featureId} 
          */ 
         hideFeature: function (channel, payload) { 
-            console.log('map.feature.hide triggered'); 
+            //console.log('map.feature.hide triggered');
             //TOD: Add error checking
             ol3_cmapi_wrapper.feature.features[payload.featureId].marker.setOpacity(0);
             // marker.setOpacity(1 or 0);
@@ -508,7 +524,7 @@ var ol3_cmapi_wrapper = {
          * payload = {overlayId, featureId, zoom} 
          */ 
         showFeature: function (channel, payload) { 
-            console.log('map.feature.show triggered'); 
+            //console.log('map.feature.show triggered');
             //TOD: Add error checking
             ol3_cmapi_wrapper.feature.features[payload.featureId].marker.setOpacity(1);
             // marker.setOpacity(1 or 0);
@@ -524,7 +540,7 @@ var ol3_cmapi_wrapper = {
          * payload = {selectedId, selectedName, featureId, overlayId} 
          */ 
         featureSelected: function (channel, payload) { 
-            console.log('map.feature.selected triggered'); 
+            //console.log('map.feature.selected triggered');
         }, 
   
         /** 
@@ -535,10 +551,10 @@ var ol3_cmapi_wrapper = {
          * payload = {deSelectedId, deSelectedName, featureId, overlayId} 
          */ 
         featureDeselected: function (channel, payload) { 
-            console.log('map.feature.deselected triggered'); 
+            //console.log('map.feature.deselected triggered');
         },
         featureUpdate: function (channel,payload) {
-            console.debug('map.feature.update triggered');
+            //console.debug('map.feature.update triggered');
         }
     }, 
       
@@ -562,7 +578,7 @@ var ol3_cmapi_wrapper = {
          * payload = {range}
          */
         zoom: function (channel, payload) {
-            console.log('map.view.zoom triggered');
+            //console.log('map.view.zoom triggered');
             ol3_map.setZoom(payload.range);
         },
         
@@ -573,7 +589,7 @@ var ol3_cmapi_wrapper = {
          * payload = {overlayId, zoom}
          */
         centerOnOverlay: function (channel, payload) {
-            console.log('map.view.center.overlay triggered');
+            //console.log('map.view.center.overlay triggered');
             if (typeof payload.overlayId === 'string'){
                 //Take the overlay ID and use it to find the overlay bounds
                 var bounds = ol3_cmapi_wrapper.overlays[payload.overlay].obj.getBounds();
@@ -603,7 +619,7 @@ var ol3_cmapi_wrapper = {
          * payload = {overlayId, featureId, zoom}
          */
         centerOnFeature: function (channel, payload) {
-            console.log('map.view.center.feature triggered');
+            //console.log('map.view.center.feature triggered');
             if (typeof payload.overlayId === 'string'){
                 //Take the overlay ID and use it to find the overlay bounds
                 var bounds = ol3_cmapi_wrapper.overlays[payload.overlay].obj.getBounds();
@@ -639,7 +655,7 @@ var ol3_cmapi_wrapper = {
          * location = {lat, lon}
          */
         centerOnLocation: function (channel, payload) {
-            console.log('map.view.center.location triggered');
+            //console.log('map.view.center.location triggered');
             if (typeof payload.zoom === 'number'){
                 var havezoom = true;
                 var range = payload.zoom;
@@ -661,7 +677,7 @@ var ol3_cmapi_wrapper = {
          * bounds  = {southWest: {lat, lon}, northEast: {lat, lon}}
          */
         centerOnBounds: function (channel, payload) {
-            console.log('map.view.center.bounds triggered');
+            //console.log('map.view.center.bounds triggered');
             sw= new L.latLng(payload.southWest.lat, payload.southWest.lon)
             ne= new L.latLng(payload.northEast.lat, payload.northEast.lon)
             ol3_map.fitBounds(L.latLngBounds(sw,ne));
@@ -676,7 +692,7 @@ var ol3_cmapi_wrapper = {
          * payload = {lat, lon}
          */
         mapClicked: function () {
-            console.log('map.view.clicked triggered');
+            //console.log('map.view.clicked triggered');
             eventstuff = { 
                 latlng: L.latLng(payload.lat, payload.lon),
                 //We have to figure out how to do this
@@ -718,7 +734,7 @@ var ol3_cmapi_wrapper = {
          *        If omitted, all status messages will be published.
          */
         request: function (senderID, payload, channel) {
-            console.log('Received a map.status.request message from '+senderID.id);
+            //console.log('Received a map.status.request message from '+senderID.id);
             //THE MAP MUST SUBSCRIBE TO THIS MESSAGE!!!
 
             if(payload===undefined) {
@@ -733,7 +749,7 @@ var ol3_cmapi_wrapper = {
 
             if(req.types===undefined) {
                 //WE NEED TO PROVIDE ALL RESPONSES.
-                console.debug('payload.types is undefined, providing a full status report:map.status.view, map.status.format, map.status.about, map.status.selected, map.status.initialization');
+                //console.debug('payload.types is undefined, providing a full status report:map.status.view, map.status.format, map.status.about, map.status.selected, map.status.initialization');
                 req.types=['view','about','selected','format','initialization'];
                 //NEXT PARAGRAPHS WILL EXECUTE ALL FUNCTIONS.
             }
@@ -741,7 +757,7 @@ var ol3_cmapi_wrapper = {
             for (type in payload.types) {
                 switch(payload.types[type]) {
                     case 'view':
-                        console.debug('Publishing a map.status.view response for ' + senderID.id);
+                        //console.debug('Publishing a map.status.view response for ' + senderID.id);
                         res_payload=ol3_cmapi_wrapper.status.respondWithMapViewStatus();
                         //GOT THE PAYLOAD
                         //NOW WRAPPIT, AND PUBLISH
@@ -761,7 +777,7 @@ var ol3_cmapi_wrapper = {
 
                         continue;
                     case 'about':
-                        console.debug('Publishing a map.status.about response');
+                        //console.debug('Publishing a map.status.about response');
                         res_payload=ol3_cmapi_wrapper.status.respondWithMapAboutStatus();
                         //GOT THE PAYLOAD
                         //NOW WRAPPIT, AND PUBLISH
@@ -769,7 +785,7 @@ var ol3_cmapi_wrapper = {
                         continue;
 
                     case 'selected':
-                        console.debug('Publishing a map.status.selected response');
+                        //console.debug('Publishing a map.status.selected response');
                         res_payload=ol3_cmapi_wrapper.status.respondWithMapSelectedStatus();
                         //GOT THE PAYLOAD
                         //NOW WRAPPIT, AND PUBLISH
@@ -777,7 +793,7 @@ var ol3_cmapi_wrapper = {
                         continue;
 
                     case 'initialization' :
-                        console.debug('Publishing a map.status.initialization response');
+                        //console.debug('Publishing a map.status.initialization response');
                         res_payload=ol3_cmapi_wrapper.status.respondWithMapInitializationStatus();
                         //GOT THE PAYLOAD
                         //NOW WRAPPIT, AND PUBLISH
@@ -785,7 +801,7 @@ var ol3_cmapi_wrapper = {
                         continue;
 
                     case 'format':
-                        console.debug('Publishing a map.status.format response');
+                        //console.debug('Publishing a map.status.format response');
                         res_payload=ol3_cmapi_wrapper.status.respondWithMapFormatStatus();
                         //GOT THE PAYLOAD
                         //NOW WRAPPIT, AND PUBLISH
@@ -823,7 +839,7 @@ var ol3_cmapi_wrapper = {
             //The ol3_map variable is set by the polymer cmapi wrapper to the OL3 map object internal to the other Polymer wrapper.
             //So lets rock!!!!!
             if(ol3_cmapi_wrapper.ol3_map.getView==undefined){
-                ol3_cmapi_wrapper.ol3_map=document.querySelector('#ol3_map')._ol3_map;
+                ol3_cmapi_wrapper.ol3_map=document.querySelector('#polimap-ol3cesium')._ol3_map;
                 ol3_cmapi_wrapper.ol3_map.updateSize();
                 var view=ol3_cmapi_wrapper.ol3_map.getView();
                 view.on('propertychange', ol3_cmapi_wrapper.onMapViewChange,ol3_cmapi_wrapper);
@@ -917,7 +933,7 @@ var ol3_cmapi_wrapper = {
         respondWithMapSelectedStatus: function () {
             /* TODO: ADAPT THE CODE TO GET THE SELECTED STATUS TO OL3 OR USE A WRAPPER SPECIFIC INFORMATION!!!. THE OBJECT OL3_MAP DOES NOT EXIST IN THIS CONTEXT, IT WOULD BE THE INTERNAL VARIABLE OF THE POLYMER WRAPPER FOR THE OL3
              */
-            console.log('map.status.selected triggered');
+            //console.log('map.status.selected triggered');
         },
 
         /**
@@ -930,7 +946,7 @@ var ol3_cmapi_wrapper = {
         respondWithMapInitializationStatus: function () {
             /* TODO: ADAPT THE CODE TO GET THE INITIALIZATION STATUS TO OL3 OR USE A WRAPPER SPECIFIC INFORMATION!!!. THE OBJECT OL3_MAP DOES NOT EXIST IN THIS CONTEXT, IT WOULD BE THE INTERNAL VARIABLE OF THE POLYMER WRAPPER FOR THE OL3
              */
-            console.log('map.status.initialization triggered');
+            //console.log('map.status.initialization triggered');
         }
         
     },
@@ -989,8 +1005,8 @@ var ol3_cmapi_wrapper = {
             channel: "map.status.request",
             message: payload,
         };
-        console.debug('The Map View has changed, notifying CMAPI map.status.view subscribers');
-        console.debug(JSON.stringify(statusmsg));
+        //console.debug('The Map View has changed, notifying CMAPI map.status.view subscribers');
+        //console.debug(JSON.stringify(statusmsg));
         var bol=cmajs.runtimes.browser.pubSub.publish(statusmsg);
         if(!bol) {
             console.error('There was an error publishing the map.status.request message. ');

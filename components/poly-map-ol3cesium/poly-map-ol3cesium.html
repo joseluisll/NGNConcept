@@ -1,0 +1,138 @@
+
+
+<!-- Imports polymer -->
+<link rel="import" href="../../bower_components/polymer/polymer.html">
+
+<!-- Defines element markup -->
+<dom-module id="poly-map-ol3cesium" attributes="UUID">
+
+    <link rel="stylesheet" href="../../libs/ol3/ol.css">
+
+    <style>
+        :host { display: block; }
+        :host #map {height:100%; width:100%}
+    </style>
+
+    <template>
+        <!-- local DOM for your element -->
+        <div id="ol3cesiummap"></div>
+        <div id="ol3cesiumglobe"></div>
+    </template>
+
+    <script>     window.CESIUM_BASE_URL="../../libs/ol3-cesium/Cesium/Cesium"; </script>
+    <script src="../../libs/ol3/ol.js"></script>
+    <script src="../../libs/ol3-cesium/Cesium/Cesium.js"></script>
+    <script src="../../libs/ol3-cesium/ol3cesium.js"></script>
+
+
+<!-- Registers custom element -->
+<script>
+    "use strict";
+
+
+    Polymer({
+        is: 'poly-map-ol3cesium',
+
+       //behaviors: [],
+       //listeners: {},
+
+        properties: {
+            <!-- INTERNAL PROPERTIES -->
+
+            _who: {
+                type: String,
+                value: 'This is the OL3 Polymer Wrapper.'
+            },
+            _ol3_globe: {
+                type: Object,
+                value: null
+            },
+            _ol3_map: {
+                type: Object,
+                value: null
+            },
+
+            <!-- PUBLIC PROPERTIES -->
+
+            UUID: {
+                type: String,
+                value: "",
+                readOnly: true
+            }
+        },
+
+            <!--      LYFECYCLE EVENTS  -->
+            ready: function() {
+            //Lifecycle callback invoked when all local DOM children of this element have been created and "configured" with data bound from this element, attribute values, or defaults.
+                var view = new ol.View({
+                    projection: 'EPSG:4326',
+                    center: [-100, 35],
+                    zoom: 3
+                });
+
+                var layer = new ol.layer.Tile({
+                    source: new ol.source.TileWMS({
+                        url: 'http://demo.boundlessgeo.com/geoserver/wms',
+                        params: {
+                            'LAYERS': 'ne:NE1_HR_LC_SR_W_DR'
+                        }
+                    })
+                });
+                var overlay = new ol.layer.Tile({
+                    opacity: 0.7,
+                    extent: [-124.74, 24.96, -66.96, 49.38],
+                    source: new ol.source.TileWMS(/** @type {olx.source.TileWMSOptions} */ ({
+                        url: 'http://demo.boundlessgeo.com/geoserver/wms',
+                        params: {'LAYERS': 'topp:states', 'TILED': true},
+                        serverType: 'geoserver',
+                        crossOrigin: 'anonymous'
+                    }))
+                });
+
+               this._ol3_map = new ol.Map({
+                    layers: [layer, overlay],
+                    target: 'ol3cesiummap',
+                    view: view
+                });
+
+                this._ol3_globe = new olcs.OLCesium({map: this._ol3_map});
+                var scene = this._ol3_globe.getCesiumScene();
+                var terrainProvider = new Cesium.CesiumTerrainProvider({
+                    url : '//cesiumjs.org/stk-terrain/tilesets/world/tiles'
+                });
+                scene.terrainProvider = terrainProvider;
+
+                this._ol3_globe.setEnabled(false);
+
+                console.log('Event READY executed.');
+            },
+
+            created: function() {
+                console.log('Event created executed.');
+            },
+
+            attached: function() {
+                console.log('Event attached executed.');
+            },
+
+            detached: function() {
+                console.log('Event detached executed.');
+
+            },
+
+            attributeChanged: function(name, type) {
+                console.log('Event attributeChanged executed.');
+            },
+
+            //public API
+            enable3D: function() {
+                this._ol3_globe.setEnabled(true);
+            },
+
+            disable3D: function() {
+                this._ol3_globe.setEnabled(false);
+            }
+    });
+</script>
+
+</dom-module>

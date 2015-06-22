@@ -161,7 +161,7 @@
                         channel: "map.status.request",
                         message: payload,
                     };
-                    console.debug(JSON.stringify(statusmsg));
+                    //console.debug(JSON.stringify(statusmsg));
                     var bol=this._cmajs.runtimes.browser.pubSub.publish(statusmsg);
                     if(!bol) {
                         console.error('There was an error publishing the map.status.request message. ');

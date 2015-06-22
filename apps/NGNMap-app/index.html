@@ -33,6 +33,7 @@
   <link rel="import" href="../../bower_components/paper-material/paper-material.html">
 
   <link rel="import" href="../../components/poly-map-ol3/poly-map-ol3.html">
+  <link rel="import" href="../../components/poly-map-ol3cesium/poly-map-ol3cesium.html">
   <link rel="import" href="../../components/poly-cmapi-ol3/poly-cmapi-ol3.html">
   <link rel="import" href="../../components/poly-cmapi-inspector/poly-cmapi-inspector.html">
 
@@ -70,6 +71,13 @@
     }
 
     poly-map-ol3 {
+      float: left;
+      width: 1024px;
+      height: 600px;
+      margin: 6px;
+    }
+
+    poly-map-ol3cesium {
       float: left;
       width: 1024px;
       height: 600px;
@@ -137,7 +145,7 @@
     }
   </style>
 </head>
-<body>
+<div>
   <ul class="menu">
     <li><a href="#/view1">view1</a></li>
     <li><a href="#/view2">view2</a></li>
@@ -145,14 +153,31 @@
 
   <!--[if lt IE 7]><p class="browsehappy">You are using an <strong>outdated</strong> browser. Please <a href="http://browsehappy.com/">upgrade your browser</a> to improve your experience.</p><![endif]-->
 
+
+
+  <!-- In production use:
+  <script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
+  -->
+  <script src="../../bower_components/angular/angular.js"></script>
+  <script src="../../bower_components/angular-route/angular-route.js"></script>
+  <script src="app.js"></script>
+  <script src="view1/view1.js"></script>
+  <script src="view2/view2.js"></script>
+  <script src="../../components/version/version.js"></script>
+  <script src="../../components/version/version-directive.js"></script>
+  <script src="../../components/version/interpolate-filter.js"></script>
+
+
   <paper-drawer-panel id="paperDrawerPanel" forceNarrow="true" transition="true">
     <div drawer>
-
+      <paper-button id="To3D" onclick="document.querySelector('#polimap-ol3cesium').enable3D();">To3D</paper-button>
+      <paper-button id="To2D" onclick="document.querySelector('#polimap-ol3cesium').disable3D();">To2D</paper-button>
     </div>
 
     <div main>
       <paper-fab paper-drawer-toggle raised mini icon="arrow-forward" >toggle drawer</paper-fab>
 
+      <!--
       <paper-material>
         <p>BUTTON GROUP 1</p>
         <paper-fab icon="menu"></paper-fab>
@@ -173,36 +198,35 @@
         <paper-fab icon="add">+</paper-fab>
         <paper-fab icon="menu"></paper-fab>
       </paper-material>
-
+-->
 
       <div class="layout wrap inline center-center">
-        <paper-header-panel class="blue">
+        <!--paper-header-panel class="blue">
           <div class="paper-header">DEMO OF THE POLY-MAP-OL3 WEB COMPONENT</div>
           <div class="content">
             <poly-map-ol3 id="ol3_map" auto-fit-on-attach class="poly-map-ol3"></poly-map-ol3>
             <poly-cmapi-ol3 status="true" interval="1000"></poly-cmapi-ol3>
 
           </div>
+
+        </paper-header-panel-->
+
+
+        <paper-header-panel class="blue">
+          <div class="paper-header">DEMO OF THE POLY-MAP-OL3CESIUM WEB COMPONENT</div>
+          <div class="content">
+            <poly-map-ol3cesium id="polimap-ol3cesium"></poly-map-ol3cesium>
+            <poly-cmapi-ol3 status="true" interval="10000"></poly-cmapi-ol3>
+          </div>
         </paper-header-panel>
 
       </div>
-
     </div>
+
+
   </paper-drawer-panel>
+</div>
 
   <div>Angular seed app: v<span app-version></span></div>
-
-  <!-- In production use:
-  <script src="//ajax.googleapis.com/ajax/libs/angularjs/x.x.x/angular.min.js"></script>
-  -->
-  <script src="../../bower_components/angular/angular.js"></script>
-  <script src="../../bower_components/angular-route/angular-route.js"></script>
-  <script src="app.js"></script>
-  <script src="view1/view1.js"></script>
-  <script src="view2/view2.js"></script>
-  <script src="../../components/version/version.js"></script>
-  <script src="../../components/version/version-directive.js"></script>
-  <script src="../../components/version/interpolate-filter.js"></script>
-
   </body>
 </html>
