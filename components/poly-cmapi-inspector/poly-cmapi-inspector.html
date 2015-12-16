@@ -63,21 +63,22 @@
 
                 var self=this;
 
-                setTimeout(check_condition,30000);
+                setTimeout(check_condition,60000);
+
                 function check_condition() {
-                    if(window.cmajs==undefined && self._cmajs.runtimes==undefined)  {
-                        console.log('CMAJS is not available yet.');
-                        setTimeout(check_condition,30000);
-                    }else {
-                        if(window.cmajs!=undefined) {
-                            console.log('CMAJS is available now.');
-                            self._cmajs=window.cmajs;
-                            self._subscribeToCMAPIChannels();
+                        if(window.cmajs==undefined && self._cmajs.runtimes==undefined)  {
+                            console.log('CMAJS is not available yet.');
+                            setTimeout(check_condition,60000);
                         }else {
-                            setTimeout(check_condition,30000);
+                            if(window.cmajs!=undefined) {
+                                console.log('CMAJS is available now.');
+                                self._cmajs=window.cmajs;
+                                self._subscribeToCMAPIChannels();
+                            }else {
+                                setTimeout(check_condition,60000);
+                            }
                         }
-                    }
-                }
+                };
 
                 console.log('CMAPI-INSPECTOR Event READY executed.');
             },
@@ -122,7 +123,7 @@
             },
             _logCMAPIMessage: function (senderID, payload, channel) {
                 //TODO:ADD A LOCAL DOM NODE WITH THE MESSAGE. THE DOM NODE WILL BE A <P> FOR NOW. ALSO EVENTS COULD BE FIRED, AS WELL AS PUT THE MESSAGE IN THE DOm OF THE CHANNEL...
-                return;
+
                 var msg={
                     "senderID":senderID,
                     "payload":payload,
@@ -135,7 +136,9 @@
                 //var node=Polymer.dom(document.createTextNode(JSON.stringify(msg)));
 
                 Polymer.dom( self.root).appendChild(child);
+
                 //console.debug('CMAPI MESSAGE Received: '+senderID.id+' '+JSON.stringify(payload)+' '+channel);
+                return;
             }
 
         });

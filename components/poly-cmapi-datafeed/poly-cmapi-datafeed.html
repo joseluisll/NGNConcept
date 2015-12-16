@@ -266,6 +266,21 @@
                         }
                     }
                 }
+                //CLEAR THE LIST
+                var list = document.querySelector('#LISTOFAIRCRAFTS');
+                while (list.firstChild) {//CLEARR THE LIST OF STUFFF
+                    list.removeChild(list.firstChild);
+                }
+                //DUMP THE DATA INTO THE LIST.
+                var child;
+                index=0;
+                while(index<aircraft.length) {
+                    child = document.createElement('p');
+
+                    list.appendChild(child);child.innerText = aircraft[index].id + aircraft[index].attributes;//DATA OF AIRCRAFT.
+                    index++;
+                }
+
                 //console.log('Processed '+ counter+' Aircrafts');
                 counter=0;
                 data=null;

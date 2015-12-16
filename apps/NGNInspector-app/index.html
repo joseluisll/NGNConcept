@@ -32,7 +32,8 @@
     <link rel="import" href="../../bower_components/iron-flex-layout/classes/iron-flex-layout.html">
     <link rel="import" href="../../bower_components/paper-styles/typography.html">
     <link rel="import" href="../../bower_components/paper-material/paper-material.html">
-
+    <link rel="import" href="../../bower_components/paper-item/paper-item.html">
+    <link rel="import" href="../../bower_components/paper-item/paper-item-body.html">
     <link rel="import" href="../../components/poly-cmapi-inspector/poly-cmapi-inspector.html">
 
     <link rel="import" href="../../components/poly-cmapi-datafeed/poly-cmapi-datafeed.html">
@@ -145,6 +146,7 @@
 <script src="app.js"></script>
 
 <div class="layout wrap inline center-center">
+
     <paper-header-panel class="blue">
         <div class="paper-header">DEMO OF THE POLY-MAP-OL3 WEB COMPONENT</div>
         <div class="content">
@@ -153,9 +155,39 @@
                 <paper-button raised disabled>CLOSE MAPAPP</paper-button>
             </paper-toolbar>
 
+
+
+
             <poly-cmapi-inspector id="cmapi-inspector"></poly-cmapi-inspector>
+
+
         </div>
     </paper-header-panel>
+
+</div>
+
+    <div>
+    <h4>AIRCRAFT LIST</h4>
+    <div class="list" id="LISTOFAIRCRAFTS">
+        <paper-item>
+            <paper-item-body two-line class="layout vertical">
+                <div>Profile Photo</div>
+                <div secondary>Change your Google+ profile photo</div>
+            </paper-item-body>
+        </paper-item>
+        <paper-item>
+            <paper-item-body two-line>
+                <div>Show your status</div>
+                <div secondary>Your status is visible to everyone you use with</div>
+            </paper-item-body>
+        </paper-item>
+        <paper-item>
+            <paper-item-body two-line class="layout vertical">
+                <div>Settings</div>
+                <div secondary>Change your account settings</div>
+            </paper-item-body>
+        </paper-item>
+    </div>
 </div>
 
 <div>

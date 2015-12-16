@@ -9,7 +9,7 @@ function openMapApp(args) {
         window.cmapi=ref.cmapi;
         cmapiinspector._subscribeToCMAPIChannels();
         console.debug("CALLED.");
-    }, 3000);
+    }, 60000);
     return ref;
 };
 
